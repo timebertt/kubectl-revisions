@@ -1,0 +1,202 @@
+package diff
+
+import (
+	"context"
+	"errors"
+	"fmt"
+	"strings"
+
+	"github.com/spf13/cobra"
+	"k8s.io/cli-runtime/pkg/genericclioptions"
+	cmdutil "k8s.io/kubectl/pkg/cmd/util"
+	"k8s.io/utils/exec"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	"github.com/timebertt/kubectl-history/pkg/cmd/util"
+	"github.com/timebertt/kubectl-history/pkg/diff"
+	"github.com/timebertt/kubectl-history/pkg/history"
+	"github.com/timebertt/kubectl-history/pkg/runutil"
+)
+
+type Options struct {
+	genericclioptions.IOStreams
+
+	Namespace  string
+	Revisions  []int64
+	PrintFlags *util.PrintFlags
+
+	Diff diff.Program
+}
+
+func NewOptions(streams genericclioptions.IOStreams) *Options {
+	return &Options{
+		IOStreams:  streams,
+		PrintFlags: util.NewPrintFlags(),
+		Diff:       diff.NewProgram(streams),
+	}
+}
+
+func NewCommand(f util.Factory, streams genericclioptions.IOStreams) *cobra.Command {
+	o := NewOptions(streams)
+
+	cmd := &cobra.Command{
+		Use:   "diff (TYPE[.VERSION][.GROUP] NAME | TYPE[.VERSION][.GROUP]/NAME)",
+		Short: "Compare multiple revisions of a workload resource",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			ctx := cmd.Context()
+
+			cmdutil.CheckErr(o.Complete(f))
+			cmdutil.CheckErr(o.Validate())
+			cmdutil.CheckErr(o.Run(ctx, f, args))
+
+			return nil
+		},
+	}
+
+	o.PrintFlags.AddFlags(cmd.Flags(), "Compare")
+
+	cmd.Flags().Int64SliceVarP(&o.Revisions, "revision", "r", nil, "Compare the specified revision with its predecessor. "+
+		"Specify -1 for the latest revision, -2 for the one before the latest, etc.\n"+
+		"If given twice, compare the specified two revisions. If not given, compare the latest two revisions.")
+
+	return cmd
+}
+
+// Complete takes the command arguments and factory and infers any remaining options.
+func (o *Options) Complete(f util.Factory) error {
+	var err error
+	o.Namespace, _, err = f.ToRawKubeConfigLoader().Namespace()
+
+	// default to the latest revision if none is given
+	if len(o.Revisions) == 0 {
+		o.Revisions = []int64{-1}
+	}
+
+	return err
+}
+
+// Validate checks the set of flags provided by the user.
+func (o *Options) Validate() error {
+	if len(o.Revisions) > 2 {
+		return fmt.Errorf("expected at maximum 2 revisions, but got %d", len(o.Revisions))
+	}
+
+	for _, revision := range o.Revisions {
+		if revision == 0 {
+			return fmt.Errorf("invalid revision 0")
+		}
+	}
+
+	return o.PrintFlags.Validate()
+}
+
+// Run performs the diff operation.
+func (o *Options) Run(ctx context.Context, f util.Factory, args []string) (err error) {
+	r := f.NewBuilder().
+		Unstructured().
+		NamespaceParam(o.Namespace).DefaultNamespace().
+		ResourceTypeOrNameArgs(true, args...).
+		SingleResourceType().
+		Do()
+
+	if err := r.Err(); err != nil {
+		return err
+	}
+
+	c, err := f.Client()
+	if err != nil {
+		return err
+	}
+
+	infos, err := r.Infos()
+	if err != nil {
+		return err
+	}
+	info := infos[0]
+	groupKind := info.Mapping.GroupVersionKind.GroupKind()
+	kindString := fmt.Sprintf("%s.%s", strings.ToLower(groupKind.Kind), groupKind.Group)
+
+	// get all revisions for the given object
+	hist, err := history.ForGroupKind(c, groupKind)
+	if err != nil {
+		return err
+	}
+
+	revs, err := hist.ListRevisions(ctx, client.ObjectKey{Namespace: info.Namespace, Name: info.Name})
+	if err != nil {
+		return err
+	}
+	if len(revs) == 0 {
+		return fmt.Errorf("no revisions found for %s/%s", kindString, info.Name)
+	}
+	if len(revs) == 1 {
+		return fmt.Errorf("only 1 revision found for %s/%s", kindString, info.Name)
+	}
+
+	// get selected revisions
+	var a, b history.Revision
+	if a, err = revs.ByNumber(o.Revisions[0]); err != nil {
+		return err
+	}
+
+	if len(o.Revisions) > 1 {
+		if b, err = revs.ByNumber(o.Revisions[1]); err != nil {
+			return err
+		}
+	} else {
+		// if only one revision is given, compare it with its predecessor
+		if b, err = revs.Predecessor(o.Revisions[0]); err != nil {
+			return err
+		}
+	}
+
+	// a should be older than b
+	if a.Number() > b.Number() {
+		a, b = b, a
+	}
+
+	_, err = fmt.Fprintf(o.ErrOut, "comparing revisions %d and %d of %s/%s\n", a.Number(), b.Number(), kindString, info.Name)
+	if err != nil {
+		return err
+	}
+
+	// prepare files for diff programm
+	files, err := diff.NewFiles(kindString+"_"+info.Name, ToFileName(a), ToFileName(b))
+	if err != nil {
+		return err
+	}
+	defer runutil.CaptureError(&err, files.TearDown)
+
+	p := o.PrintFlags.ToPrinter()
+	if err := p.Print(a, files.A); err != nil {
+		return err
+	}
+	if err := files.A.Close(); err != nil {
+		return err
+	}
+
+	if err := p.Print(b, files.B); err != nil {
+		return err
+	}
+	if err := files.B.Close(); err != nil {
+		return err
+	}
+
+	// run diff programm against prepared files
+	if err := o.Diff.Run(files.A.Name(), files.B.Name()); err != nil {
+		// don't propagate exit status 1 (signalling a diff) upwards and exit cleanly instead
+		// there will always be a diff between revisions, there is no point in checking that
+		var exitError exec.ExitError
+		if errors.As(err, &exitError) && exitError.ExitStatus() <= 1 {
+			return nil
+		}
+		return err
+	}
+
+	return nil
+}
+
+// ToFileName returns a name for a file which the given revision should be written to.
+func ToFileName(rev history.Revision) string {
+	return fmt.Sprintf("%d-%s.yaml", rev.Number(), rev.Name())
+}
