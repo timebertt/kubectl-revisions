@@ -10,6 +10,7 @@ import (
 	"k8s.io/kubectl/pkg/util/term"
 
 	"github.com/timebertt/kubectl-history/pkg/cmd/diff"
+	"github.com/timebertt/kubectl-history/pkg/cmd/get"
 	"github.com/timebertt/kubectl-history/pkg/cmd/util"
 )
 
@@ -53,6 +54,7 @@ func NewCommand() *cobra.Command {
 
 	for _, subcommand := range []*cobra.Command{
 		diff.NewCommand(f, o.IOStreams),
+		get.NewCommand(f, o.IOStreams),
 	} {
 		subcommand.GroupID = defaultGroup.ID
 		cmd.AddCommand(subcommand)
