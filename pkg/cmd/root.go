@@ -12,6 +12,7 @@ import (
 	"github.com/timebertt/kubectl-history/pkg/cmd/diff"
 	"github.com/timebertt/kubectl-history/pkg/cmd/get"
 	"github.com/timebertt/kubectl-history/pkg/cmd/util"
+	"github.com/timebertt/kubectl-history/pkg/cmd/version"
 )
 
 type Options struct {
@@ -68,6 +69,10 @@ func NewCommand() *cobra.Command {
 
 	cmd.SetCompletionCommandGroupID(otherGroup.ID)
 	cmd.SetHelpCommandGroupID(otherGroup.ID)
+
+	versionCmd := version.NewCommand(o.IOStreams)
+	versionCmd.GroupID = otherGroup.ID
+	cmd.AddCommand(versionCmd)
 
 	customizeUsageTemplate(cmd)
 
