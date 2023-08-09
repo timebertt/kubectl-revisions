@@ -1,0 +1,6 @@
+/.idea
+/bin
+/dev
+/hack/tools/bin
+cover.out
+cover.html

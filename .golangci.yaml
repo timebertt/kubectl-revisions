@@ -1,0 +1,41 @@
+run:
+  concurrency: 4
+  deadline: 10m
+
+linters:
+  enable:
+  - revive
+  - importas
+  - ginkgolinter
+
+issues:
+  exclude-use-default: false
+  exclude:
+  # revive:
+  - "exported .* should have comment or be unexported"
+  - "should have a package comment"
+  - dot-imports # should not use dot imports
+  exclude-rules:
+  - linters:
+    - staticcheck
+    text: "SA1019:" # Excludes messages where deprecated variables are used
+
+linters-settings:
+  importas:
+    alias:
+      - pkg: k8s.io/api/(\w+)/(v[\w\d]+)
+        alias: $1$2
+      - pkg: k8s.io/apimachinery/pkg/apis/(\w+)/(v[\w\d]+)
+        alias: $1$2
+      - pkg: k8s.io/apimachinery/pkg/api/([^m]\w+)
+        alias: api${1}
+      - pkg: k8s.io/kube-aggregator/pkg/apis/(\w+)/(v[\w\d]+)
+        alias: $1$2
+      - pkg: k8s.io/client-go/tools/clientcmd/api/(\w+)
+        alias: clientcmd${1}
+      - pkg: k8s.io/utils/clock/testing
+        alias: testclock
+      - pkg: sigs.k8s.io/controller-runtime/pkg/log/zap
+        alias: logzap
+      - pkg: sigs.k8s.io/controller-runtime/pkg/log
+        alias: logf
