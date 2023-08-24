@@ -4,9 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"strings"
 
 	"github.com/spf13/cobra"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/cli-runtime/pkg/genericclioptions"
 	cmdutil "k8s.io/kubectl/pkg/cmd/util"
 	"k8s.io/utils/exec"
@@ -29,9 +31,17 @@ type Options struct {
 }
 
 func NewOptions(streams genericclioptions.IOStreams) *Options {
+	printFlags := util.NewPrintFlags()
+	printFlags.WithDefaultOutput("yaml")
+	printFlags.TemplateOnly = true
+	// disable table and name output formats
+	printFlags.TableFlags = nil
+	printFlags.CustomColumnsFlags = nil
+	printFlags.NamePrintFlags = nil
+
 	return &Options{
 		IOStreams:  streams,
-		PrintFlags: util.NewPrintFlags(),
+		PrintFlags: printFlags,
 		Diff:       diff.NewProgram(streams),
 	}
 }
@@ -53,7 +63,7 @@ func NewCommand(f util.Factory, streams genericclioptions.IOStreams) *cobra.Comm
 		},
 	}
 
-	o.PrintFlags.AddFlags(cmd.Flags(), "Compare")
+	o.PrintFlags.AddFlags(cmd)
 
 	cmd.Flags().Int64SliceVarP(&o.Revisions, "revision", "r", nil, "Compare the specified revision with its predecessor. "+
 		"Specify -1 for the latest revision, -2 for the one before the latest, etc.\n"+
@@ -87,7 +97,7 @@ func (o *Options) Validate() error {
 		}
 	}
 
-	return o.PrintFlags.Validate()
+	return nil
 }
 
 // Run performs the diff operation.
@@ -167,15 +177,25 @@ func (o *Options) Run(ctx context.Context, f util.Factory, args []string) (err e
 	}
 	defer runutil.CaptureError(&err, files.TearDown)
 
-	p := o.PrintFlags.ToPrinter()
-	if err := p.Print(a, files.A); err != nil {
+	p, err := o.PrintFlags.ToPrinter()
+	if err != nil {
+		return err
+	}
+
+	// the yaml printer adds a `---` separator starting from the second call to PrintObj
+	// call it once to /dev/null to have the separator in both files to compare
+	if err = p.PrintObj(&corev1.Namespace{}, io.Discard); err != nil {
+		return err
+	}
+
+	if err := p.PrintObj(a, files.A); err != nil {
 		return err
 	}
 	if err := files.A.Close(); err != nil {
 		return err
 	}
 
-	if err := p.Print(b, files.B); err != nil {
+	if err := p.PrintObj(b, files.B); err != nil {
 		return err
 	}
 	if err := files.B.Close(); err != nil {

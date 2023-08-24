@@ -1,64 +1,121 @@
 package printer
 
 import (
-	"fmt"
 	"io"
-	"strconv"
 	"strings"
-	"time"
 
+	"k8s.io/apimachinery/pkg/api/meta/table"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/util/duration"
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/cli-runtime/pkg/printers"
 
 	"github.com/timebertt/kubectl-history/pkg/history"
 )
 
-var _ Printer = TablePrinter{}
+var _ printers.ResourcePrinter = RevisionsToTablePrinter{}
 
-// TablePrinter prints revisions in a tab-delimited table.
-// Call PrintHeaders first to add table headers.
-type TablePrinter struct {
+// RevisionsToTablePrinter transforms revision objects to a metav1.Table and passes it on to the delegate (table)
+// printer.
+type RevisionsToTablePrinter struct {
+	Delegate printers.ResourcePrinter
+
 	// Columns is the list of columns that should be printed.
 	Columns []TableColumn
 }
 
 // TableColumn represents a single column with a header and logic for extracting a revision's cell value.
 type TableColumn struct {
-	Header  string
-	Extract func(rev history.Revision) string
+	metav1.TableColumnDefinition
+	Extract func(rev history.Revision) any
 }
 
-// DefaultTableColumns is the default list of columns to print.
+// DefaultTableColumns is the list of default column definitions.
 var DefaultTableColumns = []TableColumn{
-	{Header: "Name", Extract: func(rev history.Revision) string { return rev.Name() }},
-	{Header: "Revision", Extract: func(rev history.Revision) string { return strconv.FormatInt(rev.Number(), 10) }},
-	{Header: "Age", Extract: func(rev history.Revision) string { return humanDurationSince(rev.Object().GetCreationTimestamp()) }},
+	{
+		TableColumnDefinition: metav1.TableColumnDefinition{
+			Name:   "Name",
+			Type:   "string",
+			Format: "name",
+		},
+		Extract: func(rev history.Revision) any { return rev.Name() },
+	},
+	{
+		TableColumnDefinition: metav1.TableColumnDefinition{
+			Name: "Revision",
+			Type: "integer",
+		},
+		Extract: func(rev history.Revision) any { return rev.Number() },
+	},
+	{
+		TableColumnDefinition: metav1.TableColumnDefinition{
+			Name: "Age",
+			Type: "string",
+		},
+		Extract: func(rev history.Revision) any {
+			return table.ConvertToHumanReadableDateType(rev.Object().GetCreationTimestamp())
+		},
+	},
+	{
+		TableColumnDefinition: metav1.TableColumnDefinition{
+			Name:     "Containers",
+			Type:     "string",
+			Priority: 1,
+		},
+		Extract: func(rev history.Revision) any {
+			var names []string
+			for _, container := range rev.PodTemplate().Spec.Containers {
+				names = append(names, container.Name)
+			}
+			return strings.Join(names, ",")
+		},
+	},
+	{
+		TableColumnDefinition: metav1.TableColumnDefinition{
+			Name:     "Images",
+			Type:     "string",
+			Priority: 1,
+		},
+		Extract: func(rev history.Revision) any {
+			var images []string
+			for _, container := range rev.PodTemplate().Spec.Containers {
+				images = append(images, container.Image)
+			}
+			return strings.Join(images, ",")
+		},
+	},
 }
 
-func (t TablePrinter) PrintHeaders(w io.Writer) error {
-	var headers []string
-	for _, column := range t.Columns {
-		headers = append(headers, strings.ToUpper(column.Header))
+func (p RevisionsToTablePrinter) PrintObj(obj runtime.Object, w io.Writer) error {
+	var revs history.Revisions
+	switch r := obj.(type) {
+	case history.Revision:
+		revs = history.Revisions{r}
+	case history.Revisions:
+		revs = r
+	default:
+		return p.Delegate.PrintObj(obj, w)
 	}
 
-	_, err := fmt.Fprintln(w, strings.Join(headers, "\t"))
-	return err
-}
+	t := &metav1.Table{}
 
-func (t TablePrinter) Print(rev history.Revision, w io.Writer) error {
-	var cells []string
-	for _, column := range t.Columns {
-		cells = append(cells, column.Extract(rev))
+	// build column definitions
+	for _, column := range p.Columns {
+		t.ColumnDefinitions = append(t.ColumnDefinitions, *column.TableColumnDefinition.DeepCopy())
 	}
 
-	_, err := fmt.Fprintln(w, strings.Join(cells, "\t"))
-	return err
-}
+	// build rows
+	for _, rev := range revs {
+		var cells []any
 
-func humanDurationSince(timestamp metav1.Time) string {
-	if timestamp.IsZero() {
-		return "<unknown>"
+		for _, column := range p.Columns {
+			cells = append(cells, column.Extract(rev))
+		}
+
+		t.Rows = append(t.Rows, metav1.TableRow{
+			Cells:  cells,
+			Object: runtime.RawExtension{Object: rev.Object()},
+		})
 	}
 
-	return duration.HumanDuration(time.Since(timestamp.Time))
+	return p.Delegate.PrintObj(t, w)
 }

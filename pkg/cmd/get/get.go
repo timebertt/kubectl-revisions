@@ -7,14 +7,11 @@ import (
 
 	"github.com/spf13/cobra"
 	"k8s.io/cli-runtime/pkg/genericclioptions"
-	"k8s.io/cli-runtime/pkg/printers"
 	cmdutil "k8s.io/kubectl/pkg/cmd/util"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/timebertt/kubectl-history/pkg/cmd/util"
 	"github.com/timebertt/kubectl-history/pkg/history"
-	"github.com/timebertt/kubectl-history/pkg/printer"
-	"github.com/timebertt/kubectl-history/pkg/runutil"
 )
 
 type Options struct {
@@ -26,9 +23,11 @@ type Options struct {
 }
 
 func NewOptions(streams genericclioptions.IOStreams) *Options {
+	printFlags := util.NewPrintFlags()
+
 	return &Options{
 		IOStreams:  streams,
-		PrintFlags: util.NewPrintFlags(),
+		PrintFlags: printFlags,
 	}
 }
 
@@ -49,7 +48,7 @@ func NewCommand(f util.Factory, streams genericclioptions.IOStreams) *cobra.Comm
 		},
 	}
 
-	o.PrintFlags.AddFlags(cmd.Flags(), "Print")
+	o.PrintFlags.AddFlags(cmd)
 
 	cmd.Flags().Int64VarP(&o.Revision, "revision", "r", 0, "Print the specified revision instead of getting the entire history. "+
 		"Specify -1 for the latest revision, -2 for the one before the latest, etc.")
@@ -109,31 +108,21 @@ func (o *Options) Run(ctx context.Context, f util.Factory, args []string) (err e
 		return fmt.Errorf("no revisions found for %s/%s", kindString, info.Name)
 	}
 
+	o.PrintFlags.SetKind(revs[0].GetObjectKind().GroupVersionKind().GroupKind())
+	p, err := o.PrintFlags.ToPrinter()
+	if err != nil {
+		return err
+	}
+
 	if o.Revision != 0 {
 		// select a single revision
 		rev, err := revs.ByNumber(o.Revision)
 		if err != nil {
 			return err
 		}
-		revs = history.Revisions{rev}
+
+		return p.PrintObj(rev, o.Out)
 	}
 
-	// print revisions table
-	w := printers.GetNewTabWriter(o.Out)
-	defer runutil.CaptureError(&err, w.Flush)
-
-	p := printer.TablePrinter{
-		Columns: printer.DefaultTableColumns,
-	}
-	if err := p.PrintHeaders(w); err != nil {
-		return err
-	}
-
-	for _, r := range revs {
-		if err := p.Print(r, w); err != nil {
-			return err
-		}
-	}
-
-	return nil
+	return p.PrintObj(revs, o.Out)
 }
