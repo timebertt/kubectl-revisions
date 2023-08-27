@@ -35,6 +35,8 @@ func ForGroupKind(c client.Client, gk schema.GroupKind) (History, error) {
 	switch {
 	case gk.Group == appsv1.GroupName && gk.Kind == "Deployment":
 		return DeploymentHistory{Client: c}, nil
+	case gk.Group == appsv1.GroupName && gk.Kind == "StatefulSet":
+		return StatefulSetHistory{Client: c}, nil
 	}
 
 	return nil, fmt.Errorf("%s is not supported", gk.String())
