@@ -38,7 +38,7 @@ func (d DeploymentHistory) ListRevisions(ctx context.Context, key client.ObjectK
 			continue
 		}
 
-		revision, err := NewReplicaSet(replicaSet.DeepCopy())
+		revision, err := NewReplicaSet(&replicaSet)
 		if err != nil {
 			return nil, fmt.Errorf("error converting ReplicaSet %s: %w", replicaSet.Name, err)
 		}

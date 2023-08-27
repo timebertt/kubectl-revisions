@@ -23,6 +23,8 @@ type ReplicaSet struct {
 
 // NewReplicaSet transforms the given ReplicaSet to a Revision object.
 func NewReplicaSet(replicaSet *appsv1.ReplicaSet) (*ReplicaSet, error) {
+	replicaSet = replicaSet.DeepCopy()
+
 	revision := &ReplicaSet{}
 	revision.ReplicaSet = replicaSet
 

@@ -89,6 +89,10 @@ func (r Revisions) DeepCopyObject() runtime.Object {
 // ByNumber finds the Revision with the given revision number in a sorted revision list.
 // -1 denotes the latest revision, -2 the previous one, etc.
 func (r Revisions) ByNumber(number int64) (Revision, error) {
+	if len(r) == 0 {
+		return nil, fmt.Errorf("revision %d not found", number)
+	}
+
 	if number == 0 {
 		return nil, fmt.Errorf("invalid revision number %d", number)
 	}
@@ -130,7 +134,7 @@ func (r Revisions) Predecessor(number int64) (Revision, error) {
 	}
 
 	if i < 1 {
-		return nil, fmt.Errorf("predecessor of revision %d not found", number)
+		return nil, fmt.Errorf("predecessor of revision %d not found", successor.Number())
 	}
 
 	return r[i-1], nil
