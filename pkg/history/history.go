@@ -33,6 +33,8 @@ func For(c client.Client, obj client.Object) (History, error) {
 // ForGroupKind instantiates a new History client for the given GroupKind.
 func ForGroupKind(c client.Client, gk schema.GroupKind) (History, error) {
 	switch {
+	case gk.Group == appsv1.GroupName && gk.Kind == "DaemonSet":
+		return DaemonSetHistory{Client: c}, nil
 	case gk.Group == appsv1.GroupName && gk.Kind == "Deployment":
 		return DeploymentHistory{Client: c}, nil
 	case gk.Group == appsv1.GroupName && gk.Kind == "StatefulSet":
