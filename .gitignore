@@ -1,6 +1,7 @@
 /.idea
 /bin
 /dev
+/dist
 /hack/tools/bin
 cover.out
 cover.html
