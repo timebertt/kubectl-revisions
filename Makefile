@@ -72,8 +72,12 @@ verify-modules: modules ## Verify go module files are up to date.
 		echo "go module files are out of date, please run 'make modules'"; exit 1; \
 	fi
 
+.PHONY: verify-goreleaser
+verify-goreleaser: $(GORELEASER) ## Verify .goreleaser.yaml
+	$(GORELEASER) check
+
 .PHONY: verify
-verify: verify-fmt verify-modules check ## Verify everything (all verify-* rules + check).
+verify: verify-fmt verify-modules verify-goreleaser check ## Verify everything (all verify-* rules + check).
 
 ##@ Build
 
