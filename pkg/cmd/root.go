@@ -40,6 +40,13 @@ func NewCommand() *cobra.Command {
 			rest.SetDefaultWarningHandler(warningHandler)
 			return nil
 		},
+
+		CompletionOptions: cobra.CompletionOptions{
+			// Supporting shell completion for a kubectl plugin is a bit more difficult than using cobra's default generated
+			// completion as the plugin will not be called by its name directly but via `kubectl <plugin-name>`.
+			// Until that is implemented properly, disable the default completion command to prevent confusion.
+			DisableDefaultCmd: true,
+		},
 	}
 
 	flags := cmd.PersistentFlags()
