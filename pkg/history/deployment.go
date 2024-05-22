@@ -34,12 +34,10 @@ func (d DeploymentHistory) ListRevisions(ctx context.Context, key client.ObjectK
 
 	var revs Revisions
 	for _, replicaSet := range replicaSetList.Items {
-		// nolint:gosec // pointer doesn't outlive the loop iteration
 		if !metav1.IsControlledBy(&replicaSet, deployment) {
 			continue
 		}
 
-		// nolint:gosec // func deep copies object
 		revision, err := NewReplicaSet(&replicaSet)
 		if err != nil {
 			return nil, fmt.Errorf("error converting ReplicaSet %s: %w", replicaSet.Name, err)
