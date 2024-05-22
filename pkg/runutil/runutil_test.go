@@ -14,9 +14,9 @@ var _ = Describe("CaptureError", func() {
 		result error
 		f      func() error
 
-		suceeds, fails func() error
-		originalError  error
-		functionError  error
+		succeeds, fails func() error
+		originalError   error
+		functionError   error
 	)
 
 	BeforeEach(func() {
@@ -25,10 +25,10 @@ var _ = Describe("CaptureError", func() {
 		originalError = fmt.Errorf("original")
 		functionError = fmt.Errorf("function")
 
-		suceeds = func() error { return nil }
+		succeeds = func() error { return nil }
 		fails = func() error { return functionError }
 
-		f = suceeds
+		f = succeeds
 	})
 
 	Context("no original error set", func() {

@@ -204,7 +204,7 @@ func (o *Options) Run(ctx context.Context, f util.Factory, args []string) (err e
 
 	// run diff programm against prepared files
 	if err := o.Diff.Run(files.A.Name(), files.B.Name()); err != nil {
-		// don't propagate exit status 1 (signalling a diff) upwards and exit cleanly instead
+		// don't propagate exit status 1 (signaling a diff) upwards and exit cleanly instead
 		// there will always be a diff between revisions, there is no point in checking that
 		var exitError exec.ExitError
 		if errors.As(err, &exitError) && exitError.ExitStatus() <= 1 {

@@ -35,7 +35,7 @@ func NewCommand() *cobra.Command {
 		Use:   "history",
 		Short: "Time-travel through your cluster",
 
-		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+		PersistentPreRunE: func(*cobra.Command, []string) error {
 			warningHandler := rest.NewWarningWriter(o.IOStreams.ErrOut, rest.WarningWriterOptions{Deduplicate: true, Color: term.AllowsColorOutput(o.IOStreams.ErrOut)})
 			rest.SetDefaultWarningHandler(warningHandler)
 			return nil
