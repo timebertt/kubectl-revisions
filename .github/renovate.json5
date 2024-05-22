@@ -1,0 +1,115 @@
+{
+  $schema: "https://docs.renovatebot.com/renovate-schema.json",
+  extends: [
+    "config:recommended",
+    ":semanticCommitsDisabled",
+    "customManagers:githubActionsVersions"
+  ],
+  labels: ["dependencies"],
+  postUpdateOptions: ["gomodTidy"],
+  automergeStrategy: "squash",
+  // required for automerging patch updates
+  separateMinorPatch: true,
+  customManagers: [
+    {
+      // update `_VERSION` variables in Makefiles and scripts
+      // inspired by `regexManagers:dockerfileVersions` preset
+      customType: "regex",
+      fileMatch: ["Makefile$", "\\.mk$", "\\.sh$"],
+      matchStrings: [
+        "# renovate: datasource=(?<datasource>[a-z-.]+?) depName=(?<depName>[^\\s]+?)(?: (lookupName|packageName)=(?<packageName>[^\\s]+?))?(?: versioning=(?<versioning>[^\\s]+?))?(?: extractVersion=(?<extractVersion>[^\\s]+?))?(?: registryUrl=(?<registryUrl>[^\\s]+?))?\\s.+?_VERSION *[?:]?= *\"?(?<currentValue>.+?)\"?\\s"
+      ]
+    }
+  ],
+  packageRules: [
+    {
+      // automerge non-major updates except 0.* versions
+      // similar to :automergeStableNonMajor preset, but also works for versioning schemes without range support
+      matchUpdateTypes: ["minor", "patch"],
+      matchCurrentVersion: "!/^v?0\\./",
+      automerge: true
+    },
+    {
+      // automerge patch updates
+      matchUpdateTypes: ["patch"],
+      automerge: true
+    },
+    {
+      // disable automerge for go minor updates
+      matchDatasources: ["golang-version"],
+      matchUpdateTypes: ["minor"],
+      automerge: false
+    },
+    {
+      // bump k8s and controller-runtime go dependencies together
+      groupName: "k8s packages",
+      groupSlug: "k8s-go",
+      matchDatasources: ["go"],
+      matchPackagePrefixes: [
+        // from "group:kubernetes"
+        "k8s.io/api",
+        "k8s.io/apiextensions-apiserver",
+        "k8s.io/apimachinery",
+        "k8s.io/apiserver",
+        "k8s.io/cli-runtime",
+        "k8s.io/client-go",
+        "k8s.io/cloud-provider",
+        "k8s.io/cluster-bootstrap",
+        "k8s.io/code-generator",
+        "k8s.io/component-base",
+        "k8s.io/controller-manager",
+        "k8s.io/cri-api",
+        "k8s.io/csi-translation-lib",
+        "k8s.io/kube-aggregator",
+        "k8s.io/kube-controller-manager",
+        "k8s.io/kube-proxy",
+        "k8s.io/kube-scheduler",
+        "k8s.io/kubectl",
+        "k8s.io/kubelet",
+        "k8s.io/legacy-cloud-providers",
+        "k8s.io/metrics",
+        "k8s.io/mount-utils",
+        "k8s.io/pod-security-admission",
+        "k8s.io/sample-apiserver",
+        "k8s.io/sample-cli-plugin",
+        "k8s.io/sample-controller",
+        // added packages
+        "sigs.k8s.io/controller-runtime"
+      ]
+    },
+    {
+      // disable automerge for k8s minor updates
+      matchPackagePrefixes: [
+        // datasource=go
+        "k8s.io/", // includes more than the k8s-go group! (e.g., k8s.io/utils)
+        "sigs.k8s.io/controller-runtime",
+        // datasource=github-releases
+        "kubernetes/kubernetes",
+        "kubernetes-sigs/controller-tools",
+        // datasource=docker
+        "kindest/node"
+      ],
+      matchUpdateTypes: ["minor"],
+      automerge: false
+    },
+    {
+      // automerge k8s.io/utils updates
+      matchDatasources: ["go"],
+      matchPackageNames: ["k8s.io/utils"],
+      matchUpdateTypes: ["digest"],
+      automerge: true
+    },
+    {
+      // setup-envtest is not tagged, don't create a PR for every commit in controller-runtime
+      matchDatasources: ["go"],
+      matchPackageNames: ["sigs.k8s.io/controller-runtime/tools/setup-envtest"],
+      enabled: false
+    },
+    {
+      // jsonpatch has to be kept in sync with k8s and controller-runtime dependencies
+      matchDatasources: ["go"],
+      matchPackagePrefixes: ["gomodules.xyz/jsonpatch"],
+      enabled: false
+    }
+  ]
+}

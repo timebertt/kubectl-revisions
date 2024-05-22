@@ -18,16 +18,19 @@ $(TOOLS_BIN_DIR)/.version_%:
 	@touch $@
 
 GOIMPORTS_REVISER := $(TOOLS_BIN_DIR)/goimports-reviser
+# renovate: datasource=github-releases depName=incu6us/goimports-reviser
 GOIMPORTS_REVISER_VERSION ?= v3.3.1
 $(GOIMPORTS_REVISER): $(call tool_version_file,$(GOIMPORTS_REVISER),$(GOIMPORTS_REVISER_VERSION))
 	GOBIN=$(abspath $(TOOLS_BIN_DIR)) go install github.com/incu6us/goimports-reviser/v3@$(GOIMPORTS_REVISER_VERSION)
 
 GOLANGCI_LINT := $(TOOLS_BIN_DIR)/golangci-lint
+# renovate: datasource=github-releases depName=golangci/golangci-lint
 GOLANGCI_LINT_VERSION ?= v1.54.0
 $(GOLANGCI_LINT): $(call tool_version_file,$(GOLANGCI_LINT),$(GOLANGCI_LINT_VERSION))
 	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(TOOLS_BIN_DIR) $(GOLANGCI_LINT_VERSION)
 
 GORELEASER := $(TOOLS_BIN_DIR)/goreleaser
+# renovate: datasource=github-releases depName=goreleaser/goreleaser
 GORELEASER_VERSION ?= v1.20.0
 $(GORELEASER): $(call tool_version_file,$(GORELEASER),$(GORELEASER_VERSION))
 	curl -sSfL https://github.com/goreleaser/goreleaser/releases/download/$(GORELEASER_VERSION)/goreleaser_$(shell uname -s)_$(shell uname -m).tar.gz | tar -xzmf - -C $(TOOLS_BIN_DIR) goreleaser
