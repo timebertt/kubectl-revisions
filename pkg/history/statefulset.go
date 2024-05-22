@@ -38,12 +38,10 @@ func (d StatefulSetHistory) ListRevisions(ctx context.Context, key client.Object
 
 	var revs Revisions
 	for _, controllerRevision := range controllerRevisionList.Items {
-		// nolint:gosec // pointer doesn't outlive the loop iteration
 		if !metav1.IsControlledBy(&controllerRevision, statefulSet) {
 			continue
 		}
 
-		// nolint:gosec // func deep copies object
 		revision, err := NewControllerRevisionForStatefulSet(&controllerRevision)
 		if err != nil {
 			return nil, fmt.Errorf("error converting ControllerRevision %s: %w", controllerRevision.Name, err)
