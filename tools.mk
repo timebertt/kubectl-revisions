@@ -19,7 +19,7 @@ $(TOOLS_BIN_DIR)/.version_%:
 
 GOIMPORTS_REVISER := $(TOOLS_BIN_DIR)/goimports-reviser
 # renovate: datasource=github-releases depName=incu6us/goimports-reviser
-GOIMPORTS_REVISER_VERSION ?= v3.3.1
+GOIMPORTS_REVISER_VERSION ?= v3.6.4
 $(GOIMPORTS_REVISER): $(call tool_version_file,$(GOIMPORTS_REVISER),$(GOIMPORTS_REVISER_VERSION))
 	GOBIN=$(abspath $(TOOLS_BIN_DIR)) go install github.com/incu6us/goimports-reviser/v3@$(GOIMPORTS_REVISER_VERSION)
 
