@@ -30,10 +30,12 @@ func NewFiles(dirNamePrefix, fileNameA, fileNameB string) (f *Files, err error) 
 	}()
 
 	flags := os.O_WRONLY | os.O_CREATE | os.O_TRUNC
+	// nolint:gosec // no additional permissions given if file name escapes f.Dir
 	if f.A, err = os.OpenFile(filepath.Join(f.Dir, fileNameA), flags, 0600); err != nil {
 		return nil, err
 	}
 
+	// nolint:gosec // no additional permissions given if file name escapes f.Dir
 	if f.B, err = os.OpenFile(filepath.Join(f.Dir, fileNameB), flags, 0600); err != nil {
 		return nil, err
 	}
