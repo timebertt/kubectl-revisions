@@ -50,8 +50,42 @@ func NewCommand(f util.Factory, streams genericclioptions.IOStreams) *cobra.Comm
 	o := NewOptions(streams)
 
 	cmd := &cobra.Command{
-		Use:   "diff (TYPE[.VERSION][.GROUP] NAME | TYPE[.VERSION][.GROUP]/NAME)",
+		Use:     "diff (TYPE[.VERSION][.GROUP] NAME | TYPE[.VERSION][.GROUP]/NAME)",
+		Aliases: []string{"why"},
+
 		Short: "Compare multiple revisions of a workload resource",
+		Long: `Compare multiple revisions of a workload resource (Deployment, StatefulSet, or DaemonSet).
+  A.k.a., "Why was my Deployment rolled?"
+
+ The history is based on the ReplicaSets/ControllerRevisions still in the system. I.e., the history is limited by the
+configured revisionHistoryLimit.
+
+ By default, the latest two revisions are compared. The --revision flag allows selecting the revisions to compare.
+
+ KUBECTL_EXTERNAL_DIFF environment variable can be used to select your own diff command. Users can use external commands
+with params too, example: KUBECTL_EXTERNAL_DIFF="colordiff -N -u"
+
+ By default, the "diff" command available in your path will be run with the "-u" (unified diff) and "-N" (treat absent
+files as empty) options.`,
+		Example: `  # Find out why the nginx Deployment was rolled: compare the latest two revisions
+  kubectl history diff deploy nginx
+  
+  # Compare the first and third revision
+  kubectl history diff deploy nginx --revision=1,3
+  
+  # Compare the previous revision and the revision before that
+  kubectl history diff deploy nginx --revision=-2
+  
+  # Add color to the diff output
+  kubectl history diff deploy nginx | colordiff
+  
+  # Specify an external diff programm
+  KUBECTL_EXTERNAL_DIFF="colordiff -u" kubectl history diff deploy nginx
+  
+  # Show diff in VS Code
+  KUBECTL_EXTERNAL_DIFF="code --diff --wait" kubectl history diff deploy nginx
+`,
+
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()
 
