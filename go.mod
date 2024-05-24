@@ -6,7 +6,7 @@ toolchain go1.22.3
 
 require (
 	github.com/hashicorp/go-multierror v1.1.1
-	github.com/onsi/ginkgo/v2 v2.18.0
+	github.com/onsi/ginkgo/v2 v2.19.0
 	github.com/onsi/gomega v1.33.1
 	github.com/spf13/cobra v1.8.0
 	k8s.io/api v0.30.1
