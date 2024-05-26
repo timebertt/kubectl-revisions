@@ -1,3 +1,5 @@
+PROJECT_DIR := $(shell dirname $(abspath $(lastword $(MAKEFILE_LIST))))
+
 # Setting SHELL to bash allows bash commands to be executed by recipes.
 # Options are set to exit when a recipe line exits non-zero or a piped command fails.
 SHELL = /usr/bin/env bash -o pipefail
@@ -88,3 +90,22 @@ build: ## Build the kubectl-history binary.
 .PHONY: install
 install: ## Install the kubectl-history binary to $GOBIN.
 	go install .
+
+##@ Test Setup
+
+# renovate: datasource=docker depName=kindest/node
+KIND_KUBERNETES_VERSION ?= v1.28.9
+
+KIND_KUBECONFIG := $(PROJECT_DIR)/hack/kind_kubeconfig.yaml
+kind-up kind-down: export KUBECONFIG = $(KIND_KUBECONFIG)
+
+.PHONY: kind-up
+kind-up: $(KIND) $(KUBECTL) ## Launch a kind cluster for local development and testing.
+	$(KIND) create cluster --name history --image kindest/node:$(KIND_KUBERNETES_VERSION)
+	# workaround https://kind.sigs.k8s.io/docs/user/known-issues/#pod-errors-due-to-too-many-open-files
+	$(KUBECTL) get nodes -o name | cut -d/ -f2 | xargs -I {} docker exec {} sh -c "sysctl fs.inotify.max_user_instances=8192"
+	# run `export KUBECONFIG=$$PWD/hack/kind_kubeconfig.yaml` to target the created kind cluster.
+
+.PHONY: kind-down
+kind-down: $(KIND) ## Tear down the kind testing cluster.
+	$(KIND) delete cluster --name history
