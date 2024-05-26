@@ -88,6 +88,10 @@ verify-goreleaser: $(GORELEASER) ## Verify .goreleaser.yaml
 .PHONY: verify
 verify: verify-fmt verify-modules verify-goreleaser check ## Verify everything (all verify-* rules + check).
 
+.PHONY: ci-e2e-kind
+ci-e2e-kind: $(KIND)
+	./hack/ci-e2e-kind.sh
+
 ##@ Build
 
 .PHONY: build
