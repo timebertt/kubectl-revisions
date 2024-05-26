@@ -25,11 +25,11 @@ help: ## Display this help.
 
 ##@ Tools
 
-include tools.mk
+include hack/tools.mk
 
 .PHONY: clean-tools-bin
 clean-tools-bin: ## Empty the tools binary directory.
-	rm -rf $(TOOLS_BIN_DIR)/* $(TOOLS_BIN_DIR)/.version_*
+	rm -rf $(TOOLS_BIN_DIR)/*
 
 ##@ Development
 
