@@ -46,12 +46,19 @@ modules: ## Runs go mod to ensure modules are up to date.
 
 .PHONY: test
 test: ## Run tests.
-	go test -race ./...
+	go test -race ./pkg/...
 
 .PHONY: test-cover
 test-cover: ## Run tests with coverage.
 	go test -coverprofile cover.out ./...
 	go tool cover -html cover.out -o cover.html
+
+GINKGO_FLAGS ?=
+TEST_FLAGS ?=
+
+.PHONY: test-e2e
+test-e2e: $(GINKGO) $(KUBECTL) ## Run e2e tests.
+	ginkgo run --timeout=10m --poll-progress-after=10s --poll-progress-interval=5s --randomize-all --randomize-suites --keep-going --show-node-events $(GINKGO_FLAGS) ./test/e2e/... -- $(TEST_FLAGS)
 
 ##@ Verification
 
