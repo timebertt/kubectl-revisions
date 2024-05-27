@@ -46,9 +46,9 @@ E.g, release builds inject the version via -ldflags, while installing with 'go i
 the go module's version (which can also be "(devel)").`,
 		RunE: func(*cobra.Command, []string) error {
 			if version == "" {
-				fmt.Fprintln(o.Out, "could not determine build information")
+				_, _ = fmt.Fprintln(o.Out, "could not determine build information")
 			} else {
-				fmt.Fprintf(o.Out, "kubectl-history %s\n", version)
+				_, _ = fmt.Fprintf(o.Out, "kubectl-history %s\n", version)
 			}
 
 			return nil
