@@ -53,14 +53,12 @@ linters-settings:
     - name: context-as-argument
     - name: duplicated-imports
     - name: early-return
-    - name: exported
     - name: unreachable-code
 
 issues:
   exclude-use-default: false
   exclude:
   # revive:
-  - "exported .* should have comment or be unexported"
   - "should have a package comment"
   - dot-imports # should not use dot imports
   exclude-rules:
@@ -73,7 +71,7 @@ issues:
   - linters:
     - stylecheck
     text: "ST1001: should not use dot imports"
-    path: "pkg/test"
+    path: "(.+_test.go|^test/)"
   - linters:
     - nolintlint
     text: "should be written without leading space"
