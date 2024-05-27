@@ -252,5 +252,5 @@ func (o *Options) Run(ctx context.Context, f util.Factory, args []string) (err e
 
 // ToFileName returns a name for a file which the given revision should be written to.
 func ToFileName(rev history.Revision) string {
-	return fmt.Sprintf("%d-%s.yaml", rev.Number(), rev.Name())
+	return fmt.Sprintf("%d-%s", rev.Number(), rev.Name())
 }
