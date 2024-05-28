@@ -5,9 +5,10 @@ metadata:
 spec:
   version: {{ .TagName }}
   homepage: https://github.com/timebertt/kubectl-revisions
-  shortDescription: Time-travel through your workload's revision history
+  shortDescription: Time-travel through your workload revision history
   description: |
-    Go back in time in the history of revisions and answers common questions like "Why was my Deployment rolled?"
+    Go back in time in the history of revisions and answers common questions like
+    "Why was my Deployment rolled?"
   platforms:
   - selector:
       matchLabels:
