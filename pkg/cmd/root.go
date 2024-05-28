@@ -33,7 +33,7 @@ func NewCommand() *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "revisions",
-		Short: "Time-travel through your cluster",
+		Short: "Time-travel through your workload's revision history",
 
 		PersistentPreRunE: func(*cobra.Command, []string) error {
 			warningHandler := rest.NewWarningWriter(o.IOStreams.ErrOut, rest.WarningWriterOptions{Deduplicate: true, Color: term.AllowsColorOutput(o.IOStreams.ErrOut)})

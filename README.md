@@ -1,6 +1,6 @@
 # kubectl-revisions
 
-🚀 *Time-travel through your cluster* 🕰️
+🚀 *Time-travel through your workload's revision history* 🕰️
 
 ## About
 
