@@ -39,4 +39,4 @@ jobs:
     - uses: rajatjindal/krew-release-bot@v0.0.46
       # Skip release bot step on initial plugin release in favor of manual addition.
       # TODO(timebertt): drop the condition after releasing v0.1.0
-      if: ${{ !startsWith(github.ref, 'refs/tags/v') && github.ref != 'refs/tags/v0.1.0' }}
+      if: ${{ startsWith(github.ref, 'refs/tags/v') && github.ref != 'refs/tags/v0.1.0' }}
