@@ -10,7 +10,7 @@ import (
 	"github.com/onsi/gomega/types"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 
-	. "github.com/timebertt/kubectl-history/pkg/history"
+	. "github.com/timebertt/kubectl-revisions/pkg/history"
 )
 
 func TestHistory(t *testing.T) {

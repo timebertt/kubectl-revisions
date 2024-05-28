@@ -7,7 +7,7 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 	"sigs.k8s.io/controller-runtime/pkg/manager/signals"
 
-	"github.com/timebertt/kubectl-history/pkg/cmd"
+	"github.com/timebertt/kubectl-revisions/pkg/cmd"
 )
 
 func main() {

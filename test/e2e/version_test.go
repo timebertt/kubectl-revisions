@@ -5,11 +5,11 @@ import (
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gbytes"
 
-	. "github.com/timebertt/kubectl-history/test/e2e/exec"
+	. "github.com/timebertt/kubectl-revisions/test/e2e/exec"
 )
 
 var _ = Describe("version command", func() {
 	It("should print the version", func() {
-		Eventually(RunHistoryAndWait("version")).Should(Say(`kubectl-history \((devel|v.+)\)`))
+		Eventually(RunPluginAndWait("version")).Should(Say(`kubectl-revisions \((devel|v.+)\)`))
 	})
 })

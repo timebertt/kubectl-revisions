@@ -6,7 +6,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	. "github.com/timebertt/kubectl-history/pkg/runutil"
+	. "github.com/timebertt/kubectl-revisions/pkg/runutil"
 )
 
 var _ = Describe("CaptureError", func() {

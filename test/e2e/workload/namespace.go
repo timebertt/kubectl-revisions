@@ -9,7 +9,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 
-	. "github.com/timebertt/kubectl-history/pkg/test/matcher"
+	. "github.com/timebertt/kubectl-revisions/pkg/test/matcher"
 )
 
 func PrepareTestNamespace() string {
@@ -19,7 +19,7 @@ func PrepareTestNamespace() string {
 		ObjectMeta: metav1.ObjectMeta{
 			GenerateName: "test-",
 			Labels: map[string]string{
-				"e2e-test": "kubectl-history",
+				"e2e-test": "kubectl-revisions",
 			},
 		},
 	}

@@ -14,10 +14,10 @@ import (
 	"k8s.io/utils/exec"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/timebertt/kubectl-history/pkg/cmd/util"
-	"github.com/timebertt/kubectl-history/pkg/diff"
-	"github.com/timebertt/kubectl-history/pkg/history"
-	"github.com/timebertt/kubectl-history/pkg/runutil"
+	"github.com/timebertt/kubectl-revisions/pkg/cmd/util"
+	"github.com/timebertt/kubectl-revisions/pkg/diff"
+	"github.com/timebertt/kubectl-revisions/pkg/history"
+	"github.com/timebertt/kubectl-revisions/pkg/runutil"
 )
 
 type Options struct {
@@ -68,22 +68,22 @@ with params too, example: KUBECTL_EXTERNAL_DIFF="colordiff -N -u"
  By default, the "diff" command available in your path will be run with the "-u" (unified diff) and "-N" (treat absent
 files as empty) options.`,
 		Example: `  # Find out why the nginx Deployment was rolled: compare the latest two revisions
-  kubectl history diff deploy nginx
+  kubectl revisions diff deploy nginx
   
   # Compare the first and third revision
-  kubectl history diff deploy nginx --revision=1,3
+  kubectl revisions diff deploy nginx --revision=1,3
   
   # Compare the previous revision and the revision before that
-  kubectl history diff deploy nginx --revision=-2
+  kubectl revisions diff deploy nginx --revision=-2
   
   # Add color to the diff output
-  kubectl history diff deploy nginx | colordiff
+  kubectl revisions diff deploy nginx | colordiff
   
   # Specify an external diff programm
-  KUBECTL_EXTERNAL_DIFF="colordiff -u" kubectl history diff deploy nginx
+  KUBECTL_EXTERNAL_DIFF="colordiff -u" kubectl revisions diff deploy nginx
   
   # Show diff in VS Code
-  KUBECTL_EXTERNAL_DIFF="code --diff --wait" kubectl history diff deploy nginx
+  KUBECTL_EXTERNAL_DIFF="code --diff --wait" kubectl revisions diff deploy nginx
 `,
 
 		RunE: func(cmd *cobra.Command, args []string) error {

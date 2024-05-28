@@ -4,7 +4,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/timebertt/kubectl-history/pkg/runutil"
+	"github.com/timebertt/kubectl-revisions/pkg/runutil"
 )
 
 // Files is a compound handle for multiple files in a directory that shall be compared using a diff programm.

@@ -7,8 +7,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 
-	"github.com/timebertt/kubectl-history/pkg/history"
-	. "github.com/timebertt/kubectl-history/pkg/printer"
+	"github.com/timebertt/kubectl-revisions/pkg/history"
+	. "github.com/timebertt/kubectl-revisions/pkg/printer"
 )
 
 var _ = Describe("RevisionsToTablePrinter", func() {

@@ -6,8 +6,8 @@ import (
 	. "github.com/onsi/gomega/gbytes"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	. "github.com/timebertt/kubectl-history/test/e2e/exec"
-	"github.com/timebertt/kubectl-history/test/e2e/workload"
+	. "github.com/timebertt/kubectl-revisions/test/e2e/exec"
+	"github.com/timebertt/kubectl-revisions/test/e2e/workload"
 )
 
 var _ = Describe("diff command", func() {
@@ -34,7 +34,7 @@ var _ = Describe("diff command", func() {
 
 			workload.BumpImage(object)
 
-			session := RunHistoryAndWait(args...)
+			session := RunPluginAndWait(args...)
 			Eventually(session).Should(Say(`--- \S+\/1-nginx-\S+\s`))
 			Eventually(session).Should(Say(`\+\+\+ \S+\/2-nginx-\S+\s`))
 			Eventually(session).Should(Say(`-.+:0.1\n`))
@@ -47,7 +47,7 @@ var _ = Describe("diff command", func() {
 			workload.BumpImage(object)
 			workload.BumpImage(object)
 
-			session := RunHistoryAndWait(args...)
+			session := RunPluginAndWait(args...)
 			Eventually(session).Should(Say(`--- \S+\/2-nginx-\S+\s`))
 			Eventually(session).Should(Say(`\+\+\+ \S+\/3-nginx-\S+\s`))
 			Eventually(session).Should(Say(`-.+:0.2\n`))
@@ -58,7 +58,7 @@ var _ = Describe("diff command", func() {
 			workload.BumpImage(object)
 			workload.BumpImage(object)
 
-			session := RunHistoryAndWait(append(args, "--revision=1,3")...)
+			session := RunPluginAndWait(append(args, "--revision=1,3")...)
 			Eventually(session).Should(Say(`--- \S+\/1-nginx-\S+\s`))
 			Eventually(session).Should(Say(`\+\+\+ \S+\/3-nginx-\S+\s`))
 			Eventually(session).Should(Say(`-.+:0.1\n`))
@@ -69,7 +69,7 @@ var _ = Describe("diff command", func() {
 			workload.BumpImage(object)
 			workload.BumpImage(object)
 
-			session := RunHistoryAndWait(append(args, "--revision=2")...)
+			session := RunPluginAndWait(append(args, "--revision=2")...)
 			Eventually(session).Should(Say(`--- \S+\/1-nginx-\S+\s`))
 			Eventually(session).Should(Say(`\+\+\+ \S+\/2-nginx-\S+\s`))
 			Eventually(session).Should(Say(`-.+:0.1\n`))
@@ -80,7 +80,7 @@ var _ = Describe("diff command", func() {
 			workload.BumpImage(object)
 			workload.BumpImage(object)
 
-			session := RunHistoryAndWait(append(args, "--revision=-2")...)
+			session := RunPluginAndWait(append(args, "--revision=-2")...)
 			Eventually(session).Should(Say(`--- \S+\/1-nginx-\S+\s`))
 			Eventually(session).Should(Say(`\+\+\+ \S+\/2-nginx-\S+\s`))
 			Eventually(session).Should(Say(`-.+:0.1\n`))
@@ -91,7 +91,7 @@ var _ = Describe("diff command", func() {
 			workload.BumpImage(object)
 			workload.BumpImage(object)
 
-			session := RunHistoryAndWait(append(args, "-o", "jsonpath={.spec.containers[0].image}")...)
+			session := RunPluginAndWait(append(args, "-o", "jsonpath={.spec.containers[0].image}")...)
 			Eventually(session).Should(Say(`--- \S+\/2-nginx-\S+\s`))
 			Eventually(session).Should(Say(`\+\+\+ \S+\/3-nginx-\S+\s`))
 			Eventually(session).Should(Say(`-.+:0.2\n`))
@@ -101,7 +101,7 @@ var _ = Describe("diff command", func() {
 		It("should diff the revisions using the external diff programm", func() {
 			workload.BumpImage(object)
 
-			cmd := NewHistoryCommand(args...)
+			cmd := NewPluginCommand(args...)
 			cmd.Env = append(cmd.Env, "KUBECTL_EXTERNAL_DIFF=cat")
 
 			session := Wait(RunCommand(cmd))
@@ -127,7 +127,7 @@ var _ = Describe("diff command", func() {
 
 			workload.BumpImage(object)
 
-			session := RunHistoryAndWait(args...)
+			session := RunPluginAndWait(args...)
 			Eventually(session).Should(Say(`--- \S+\/1-nginx-\S+\s`))
 			Eventually(session).Should(Say(`\+\+\+ \S+\/2-nginx-\S+\s`))
 			Eventually(session).Should(Say(`-.+:0.1\n`))
@@ -139,7 +139,7 @@ var _ = Describe("diff command", func() {
 
 			workload.BumpImage(object)
 
-			session := RunHistoryAndWait(args...)
+			session := RunPluginAndWait(args...)
 			Eventually(session).Should(Say(`--- \S+\/1-nginx-\S+\s`))
 			Eventually(session).Should(Say(`\+\+\+ \S+\/2-nginx-\S+\s`))
 			Eventually(session).Should(Say(`-.+:0.1\n`))
@@ -151,7 +151,7 @@ var _ = Describe("diff command", func() {
 
 			workload.BumpImage(object)
 
-			session := RunHistoryAndWait(args...)
+			session := RunPluginAndWait(args...)
 			Eventually(session).Should(Say(`--- \S+\/1-nginx-\S+\s`))
 			Eventually(session).Should(Say(`\+\+\+ \S+\/2-nginx-\S+\s`))
 			Eventually(session).Should(Say(`-.+:0.1\n`))
@@ -164,7 +164,7 @@ var _ = Describe("diff command", func() {
 
 			workload.BumpImage(object)
 
-			session := RunHistoryAndWait(args...)
+			session := RunPluginAndWait(args...)
 			Eventually(session).Should(Say(`--- \S+\/1-nginx-\S+\s`))
 			Eventually(session).Should(Say(`\+\+\+ \S+\/2-nginx-\S+\s`))
 			Eventually(session).Should(Say(`-.+:0.1\n`))
@@ -174,7 +174,7 @@ var _ = Describe("diff command", func() {
 		It("should diff the full revision objects on --template-only=false", func() {
 			workload.BumpImage(object)
 
-			cmd := NewHistoryCommand(append(args, "--template-only=false")...)
+			cmd := NewPluginCommand(append(args, "--template-only=false")...)
 			cmd.Env = append(cmd.Env, "KUBECTL_EXTERNAL_DIFF=cat")
 
 			session := Wait(RunCommand(cmd))
@@ -191,7 +191,7 @@ var _ = Describe("diff command", func() {
 		It("should diff the full revision objects on --template-only=false", func() {
 			workload.BumpImage(object)
 
-			cmd := NewHistoryCommand(append(args, "--template-only=false")...)
+			cmd := NewPluginCommand(append(args, "--template-only=false")...)
 			cmd.Env = append(cmd.Env, "KUBECTL_EXTERNAL_DIFF=cat")
 
 			session := Wait(RunCommand(cmd))

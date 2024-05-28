@@ -6,7 +6,7 @@ import (
 	. "github.com/onsi/gomega/gbytes"
 	"github.com/onsi/gomega/gexec"
 
-	. "github.com/timebertt/kubectl-history/test/e2e/exec"
+	. "github.com/timebertt/kubectl-revisions/test/e2e/exec"
 )
 
 var _ = Describe("command help", func() {
@@ -14,7 +14,7 @@ var _ = Describe("command help", func() {
 		GinkgoHelper()
 
 		Eventually(session).Should(Say(`Usage:`))
-		Eventually(session).Should(Say(`kubectl history \[command\]\n`))
+		Eventually(session).Should(Say(`kubectl revisions \[command\]\n`))
 		Eventually(session).Should(Say(`Available Commands:\n`))
 		Eventually(session).Should(Say(`\s+diff\s+`))
 		Eventually(session).Should(Say(`Other Commands:\n`))
@@ -24,21 +24,21 @@ var _ = Describe("command help", func() {
 
 	Describe("root command", func() {
 		It("should print help without args", func() {
-			expectHelp(RunHistoryAndWait())
+			expectHelp(RunPluginAndWait())
 		})
 
 		It("should print help on -h arg", func() {
-			expectHelp(RunHistoryAndWait("-h"))
+			expectHelp(RunPluginAndWait("-h"))
 		})
 
 		It("should print help on --help arg", func() {
-			expectHelp(RunHistoryAndWait("--help"))
+			expectHelp(RunPluginAndWait("--help"))
 		})
 	})
 
 	Describe("help command", func() {
 		It("should print help", func() {
-			expectHelp(RunHistoryAndWait("help"))
+			expectHelp(RunPluginAndWait("help"))
 		})
 	})
 })

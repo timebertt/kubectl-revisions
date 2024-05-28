@@ -95,11 +95,11 @@ ci-e2e-kind: $(KIND)
 ##@ Build
 
 .PHONY: build
-build: ## Build the kubectl-history binary.
-	go build -o bin/kubectl-history .
+build: ## Build the kubectl-revisions binary.
+	go build -o bin/kubectl-revisions .
 
 .PHONY: install
-install: ## Install the kubectl-history binary to $GOBIN.
+install: ## Install the kubectl-revisions binary to $GOBIN.
 	go install .
 
 ##@ Test Setup
@@ -112,11 +112,11 @@ kind-up kind-down: export KUBECONFIG = $(KIND_KUBECONFIG)
 
 .PHONY: kind-up
 kind-up: $(KIND) $(KUBECTL) ## Launch a kind cluster for local development and testing.
-	$(KIND) create cluster --name history --image kindest/node:$(KIND_KUBERNETES_VERSION)
+	$(KIND) create cluster --name revisions --image kindest/node:$(KIND_KUBERNETES_VERSION)
 	# workaround https://kind.sigs.k8s.io/docs/user/known-issues/#pod-errors-due-to-too-many-open-files
 	$(KUBECTL) get nodes -o name | cut -d/ -f2 | xargs -I {} docker exec {} sh -c "sysctl fs.inotify.max_user_instances=8192"
 	# run `export KUBECONFIG=$$PWD/hack/kind_kubeconfig.yaml` to target the created kind cluster.
 
 .PHONY: kind-down
 kind-down: $(KIND) ## Tear down the kind testing cluster.
-	$(KIND) delete cluster --name history
+	$(KIND) delete cluster --name revisions

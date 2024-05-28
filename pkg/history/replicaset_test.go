@@ -10,7 +10,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	deploymentutil "k8s.io/kubectl/pkg/util/deployment"
 
-	. "github.com/timebertt/kubectl-history/pkg/history"
+	. "github.com/timebertt/kubectl-revisions/pkg/history"
 )
 
 var _ = Describe("ReplicaSet", func() {

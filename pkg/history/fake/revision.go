@@ -6,7 +6,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/timebertt/kubectl-history/pkg/history"
+	"github.com/timebertt/kubectl-revisions/pkg/history"
 )
 
 var _ history.Revision = &Revision{}

@@ -9,10 +9,10 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/kubectl/pkg/util/term"
 
-	"github.com/timebertt/kubectl-history/pkg/cmd/diff"
-	"github.com/timebertt/kubectl-history/pkg/cmd/get"
-	"github.com/timebertt/kubectl-history/pkg/cmd/util"
-	"github.com/timebertt/kubectl-history/pkg/cmd/version"
+	"github.com/timebertt/kubectl-revisions/pkg/cmd/diff"
+	"github.com/timebertt/kubectl-revisions/pkg/cmd/get"
+	"github.com/timebertt/kubectl-revisions/pkg/cmd/util"
+	"github.com/timebertt/kubectl-revisions/pkg/cmd/version"
 )
 
 type Options struct {
@@ -32,8 +32,8 @@ func NewCommand() *cobra.Command {
 	o := NewOptions()
 
 	cmd := &cobra.Command{
-		Use:   "history",
-		Short: "Time-travel through your cluster",
+		Use:   "revisions",
+		Short: "Time-travel through your workload's revision history",
 
 		PersistentPreRunE: func(*cobra.Command, []string) error {
 			warningHandler := rest.NewWarningWriter(o.IOStreams.ErrOut, rest.WarningWriterOptions{Deduplicate: true, Color: term.AllowsColorOutput(o.IOStreams.ErrOut)})
@@ -92,14 +92,14 @@ func NewCommand() *cobra.Command {
 // I.e., the default template would output:
 //
 //	Usage:
-//	  history [command]
+//	  revisions [command]
 //
 // The modified template outputs:
 //
 //	Usage:
-//	  kubectl history [command]
+//	  kubectl revisions [command]
 //
-// Changing cmd.Use to `kubectl history` makes cobra remove `history` from all command paths and use lines.
+// Changing cmd.Use to `kubectl revisions` makes cobra remove `revisions` from all command paths and use lines.
 func customizeUsageTemplate(cmd *cobra.Command) {
 	defaultTmpl := cmd.UsageTemplate()
 

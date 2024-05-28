@@ -16,7 +16,7 @@ import (
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
-	. "github.com/timebertt/kubectl-history/pkg/history"
+	. "github.com/timebertt/kubectl-revisions/pkg/history"
 )
 
 var _ = Describe("DeploymentHistory", func() {

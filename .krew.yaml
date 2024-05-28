@@ -1,41 +1,41 @@
 apiVersion: krew.googlecontainertools.github.com/v1alpha2
 kind: Plugin
 metadata:
-  name: history
+  name: revisions
 spec:
   version: {{ .TagName }}
-  homepage: https://github.com/timebertt/kubectl-history
-  shortDescription: Time-travel through your cluster
+  homepage: https://github.com/timebertt/kubectl-revisions
+  shortDescription: Time-travel through your workload's revision history
   description: |
-    Go back in time in the history of rollouts and answers common questions like "Why was my Deployment rolled?"
+    Go back in time in the history of revisions and answers common questions like "Why was my Deployment rolled?"
   platforms:
   - selector:
       matchLabels:
         os: linux
         arch: amd64
-    {{addURIAndSha "https://github.com/timebertt/kubectl-history/releases/download/{{ .TagName }}/kubectl-history_{{ .TagName }}_linux_amd64.tar.gz" .TagName }}
-    bin: kubectl-history
+    {{addURIAndSha "https://github.com/timebertt/kubectl-revisions/releases/download/{{ .TagName }}/kubectl-revisions_{{ .TagName }}_linux_amd64.tar.gz" .TagName }}
+    bin: kubectl-revisions
   - selector:
       matchLabels:
         os: linux
         arch: arm64
-    {{addURIAndSha "https://github.com/timebertt/kubectl-history/releases/download/{{ .TagName }}/kubectl-history_{{ .TagName }}_linux_arm64.tar.gz" .TagName }}
-    bin: kubectl-history
+    {{addURIAndSha "https://github.com/timebertt/kubectl-revisions/releases/download/{{ .TagName }}/kubectl-revisions_{{ .TagName }}_linux_arm64.tar.gz" .TagName }}
+    bin: kubectl-revisions
   - selector:
       matchLabels:
         os: darwin
         arch: amd64
-    {{addURIAndSha "https://github.com/timebertt/kubectl-history/releases/download/{{ .TagName }}/kubectl-history_{{ .TagName }}_darwin_amd64.tar.gz" .TagName }}
-    bin: kubectl-history
+    {{addURIAndSha "https://github.com/timebertt/kubectl-revisions/releases/download/{{ .TagName }}/kubectl-revisions_{{ .TagName }}_darwin_amd64.tar.gz" .TagName }}
+    bin: kubectl-revisions
   - selector:
       matchLabels:
         os: darwin
         arch: arm64
-    {{addURIAndSha "https://github.com/timebertt/kubectl-history/releases/download/{{ .TagName }}/kubectl-history_{{ .TagName }}_darwin_arm64.tar.gz" .TagName }}
-    bin: kubectl-history
+    {{addURIAndSha "https://github.com/timebertt/kubectl-revisions/releases/download/{{ .TagName }}/kubectl-revisions_{{ .TagName }}_darwin_arm64.tar.gz" .TagName }}
+    bin: kubectl-revisions
   - selector:
       matchLabels:
         os: windows
         arch: amd64
-    {{addURIAndSha "https://github.com/timebertt/kubectl-history/releases/download/{{ .TagName }}/kubectl-history_{{ .TagName }}_windows_amd64.zip" .TagName }}
-    bin: kubectl-history.exe
+    {{addURIAndSha "https://github.com/timebertt/kubectl-revisions/releases/download/{{ .TagName }}/kubectl-revisions_{{ .TagName }}_windows_amd64.zip" .TagName }}
+    bin: kubectl-revisions.exe
