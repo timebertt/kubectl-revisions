@@ -18,7 +18,7 @@ builds:
   mod_timestamp: "{{ .CommitTimestamp }}"
   ldflags:
   - -s -w
-  - -X github.com/timebertt/kubectl-history/pkg/cmd/version.version={{ .Version }}
+  - -X github.com/timebertt/kubectl-revisions/pkg/cmd/version.version={{ .Version }}
 
 archives:
 - format: tar.gz

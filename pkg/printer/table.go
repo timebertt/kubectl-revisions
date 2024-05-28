@@ -9,7 +9,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/cli-runtime/pkg/printers"
 
-	"github.com/timebertt/kubectl-history/pkg/history"
+	"github.com/timebertt/kubectl-revisions/pkg/history"
 )
 
 var _ printers.ResourcePrinter = RevisionsToTablePrinter{}

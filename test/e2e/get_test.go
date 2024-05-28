@@ -11,8 +11,8 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	. "github.com/timebertt/kubectl-history/test/e2e/exec"
-	"github.com/timebertt/kubectl-history/test/e2e/workload"
+	. "github.com/timebertt/kubectl-revisions/test/e2e/exec"
+	"github.com/timebertt/kubectl-revisions/test/e2e/workload"
 )
 
 var _ = Describe("get command", func() {

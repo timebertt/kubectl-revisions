@@ -10,8 +10,8 @@ import (
 	cmdutil "k8s.io/kubectl/pkg/cmd/util"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/timebertt/kubectl-history/pkg/cmd/util"
-	"github.com/timebertt/kubectl-history/pkg/history"
+	"github.com/timebertt/kubectl-revisions/pkg/cmd/util"
+	"github.com/timebertt/kubectl-revisions/pkg/history"
 )
 
 type Options struct {

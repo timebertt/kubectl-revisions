@@ -4,8 +4,8 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	. "github.com/timebertt/kubectl-history/pkg/history"
-	"github.com/timebertt/kubectl-history/pkg/history/fake"
+	. "github.com/timebertt/kubectl-revisions/pkg/history"
+	"github.com/timebertt/kubectl-revisions/pkg/history/fake"
 )
 
 var _ = Describe("Sort", func() {

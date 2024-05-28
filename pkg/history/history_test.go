@@ -13,8 +13,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
 
-	. "github.com/timebertt/kubectl-history/pkg/history"
-	"github.com/timebertt/kubectl-history/pkg/history/fake"
+	. "github.com/timebertt/kubectl-revisions/pkg/history"
+	"github.com/timebertt/kubectl-revisions/pkg/history/fake"
 )
 
 var _ = Describe("History", func() {

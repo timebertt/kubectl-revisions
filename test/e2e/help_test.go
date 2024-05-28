@@ -6,7 +6,7 @@ import (
 	. "github.com/onsi/gomega/gbytes"
 	"github.com/onsi/gomega/gexec"
 
-	. "github.com/timebertt/kubectl-history/test/e2e/exec"
+	. "github.com/timebertt/kubectl-revisions/test/e2e/exec"
 )
 
 var _ = Describe("command help", func() {

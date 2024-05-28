@@ -9,10 +9,10 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/kubectl/pkg/util/term"
 
-	"github.com/timebertt/kubectl-history/pkg/cmd/diff"
-	"github.com/timebertt/kubectl-history/pkg/cmd/get"
-	"github.com/timebertt/kubectl-history/pkg/cmd/util"
-	"github.com/timebertt/kubectl-history/pkg/cmd/version"
+	"github.com/timebertt/kubectl-revisions/pkg/cmd/diff"
+	"github.com/timebertt/kubectl-revisions/pkg/cmd/get"
+	"github.com/timebertt/kubectl-revisions/pkg/cmd/util"
+	"github.com/timebertt/kubectl-revisions/pkg/cmd/version"
 )
 
 type Options struct {

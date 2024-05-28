@@ -14,10 +14,10 @@ import (
 	"k8s.io/utils/exec"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/timebertt/kubectl-history/pkg/cmd/util"
-	"github.com/timebertt/kubectl-history/pkg/diff"
-	"github.com/timebertt/kubectl-history/pkg/history"
-	"github.com/timebertt/kubectl-history/pkg/runutil"
+	"github.com/timebertt/kubectl-revisions/pkg/cmd/util"
+	"github.com/timebertt/kubectl-revisions/pkg/diff"
+	"github.com/timebertt/kubectl-revisions/pkg/history"
+	"github.com/timebertt/kubectl-revisions/pkg/runutil"
 )
 
 type Options struct {

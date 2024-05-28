@@ -11,7 +11,7 @@ import (
 	kubectlget "k8s.io/kubectl/pkg/cmd/get"
 	"k8s.io/kubectl/pkg/scheme"
 
-	"github.com/timebertt/kubectl-history/pkg/printer"
+	"github.com/timebertt/kubectl-revisions/pkg/printer"
 )
 
 // PrintFlags composes common output-related flags used in multiple commands.

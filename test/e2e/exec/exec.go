@@ -25,11 +25,11 @@ func PrepareTestBinaries() {
 	if binaryPath != "" {
 		logf.Log.Info("Using pre-built binary", "path", binaryPath)
 	} else {
-		By("Building kubectl-history binary")
+		By("Building kubectl-revisions binary")
 		var err error
 		binaryPath, err = gexec.Build("../..")
 		Expect(err).NotTo(HaveOccurred())
-		binaryPath = filepath.Join(binaryPath, "kubectl-history")
+		binaryPath = filepath.Join(binaryPath, "kubectl-revisions")
 		logf.Log.Info("Using binary", "path", binaryPath)
 
 		DeferCleanup(func() {
@@ -43,7 +43,7 @@ func PrepareTestBinaries() {
 func preparePath() {
 	By("Preparing test PATH")
 	var err error
-	tmpPath, err = os.MkdirTemp("", "e2e-kubectl-history-")
+	tmpPath, err = os.MkdirTemp("", "e2e-kubectl-revisions-")
 	Expect(err).NotTo(HaveOccurred())
 	logf.Log.Info("Using tmp dir as PATH", "dir", tmpPath)
 
@@ -55,10 +55,10 @@ func preparePath() {
 	// Use a single-dir PATH with only the needed binaries inside instead of appending the user's PATH to run against a
 	// clean test environment.
 
-	// symlink the kubectl-history binary so that kubectl can find the plugin
+	// symlink the kubectl-revisions binary so that kubectl can find the plugin
 	absoluteBinaryPath, err := filepath.Abs(binaryPath)
 	Expect(err).NotTo(HaveOccurred())
-	Expect(os.Symlink(absoluteBinaryPath, filepath.Join(tmpPath, "kubectl-history"))).To(Succeed())
+	Expect(os.Symlink(absoluteBinaryPath, filepath.Join(tmpPath, "kubectl-revisions"))).To(Succeed())
 
 	// diff is used as an external diff command
 	diffPath, err := exec.LookPath("diff")

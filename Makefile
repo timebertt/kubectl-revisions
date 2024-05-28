@@ -95,11 +95,11 @@ ci-e2e-kind: $(KIND)
 ##@ Build
 
 .PHONY: build
-build: ## Build the kubectl-history binary.
-	go build -o bin/kubectl-history .
+build: ## Build the kubectl-revisions binary.
+	go build -o bin/kubectl-revisions .
 
 .PHONY: install
-install: ## Install the kubectl-history binary to $GOBIN.
+install: ## Install the kubectl-revisions binary to $GOBIN.
 	go install .
 
 ##@ Test Setup

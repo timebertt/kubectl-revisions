@@ -7,7 +7,7 @@ import (
 	"k8s.io/cli-runtime/pkg/printers"
 	"k8s.io/utils/pointer"
 
-	"github.com/timebertt/kubectl-history/pkg/printer"
+	"github.com/timebertt/kubectl-revisions/pkg/printer"
 )
 
 type TablePrintFlags struct {

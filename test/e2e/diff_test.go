@@ -6,8 +6,8 @@ import (
 	. "github.com/onsi/gomega/gbytes"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	. "github.com/timebertt/kubectl-history/test/e2e/exec"
-	"github.com/timebertt/kubectl-history/test/e2e/workload"
+	. "github.com/timebertt/kubectl-revisions/test/e2e/exec"
+	"github.com/timebertt/kubectl-revisions/test/e2e/workload"
 )
 
 var _ = Describe("diff command", func() {

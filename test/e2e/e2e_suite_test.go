@@ -18,8 +18,8 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	"github.com/timebertt/kubectl-history/test/e2e/exec"
-	"github.com/timebertt/kubectl-history/test/e2e/workload"
+	"github.com/timebertt/kubectl-revisions/test/e2e/exec"
+	"github.com/timebertt/kubectl-revisions/test/e2e/workload"
 )
 
 func TestMain(m *testing.M) {
@@ -31,7 +31,7 @@ func TestMain(m *testing.M) {
 
 func TestE2E(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "kubectl-history E2E Test Suite")
+	RunSpecs(t, "kubectl-revisions E2E Test Suite")
 }
 
 var (

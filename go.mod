@@ -1,4 +1,4 @@
-module github.com/timebertt/kubectl-history
+module github.com/timebertt/kubectl-revisions
 
 go 1.22.0
 

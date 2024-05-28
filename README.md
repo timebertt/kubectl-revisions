@@ -13,7 +13,7 @@ It gives more output than `kubectl rollout history` and is easier to use than `k
 ## Installation
 
 ```bash
-go install github.com/timebertt/kubectl-history@latest
+go install github.com/timebertt/kubectl-revisions@latest
 ```
 
 ## Usage
