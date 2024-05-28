@@ -71,9 +71,9 @@ func preparePath() {
 	Expect(os.Symlink(catPath, filepath.Join(tmpPath, "cat"))).To(Succeed())
 }
 
-func NewHistoryCommand(args ...string) *exec.Cmd {
+func NewPluginCommand(args ...string) *exec.Cmd {
 	// nolint:gosec // no security risk in shared test code
-	command := exec.Command("kubectl", append([]string{"history"}, args...)...)
+	command := exec.Command("kubectl", append([]string{"revisions"}, args...)...)
 	command.Env = append(command.Environ(), "PATH="+tmpPath)
 
 	return command
@@ -99,10 +99,10 @@ func Wait(session *gexec.Session) *gexec.Session {
 	return session
 }
 
-func RunHistory(args ...string) *gexec.Session {
-	return RunCommand(NewHistoryCommand(args...))
+func RunPlugin(args ...string) *gexec.Session {
+	return RunCommand(NewPluginCommand(args...))
 }
 
-func RunHistoryAndWait(args ...string) *gexec.Session {
-	return Wait(RunHistory(args...))
+func RunPluginAndWait(args ...string) *gexec.Session {
+	return Wait(RunPlugin(args...))
 }

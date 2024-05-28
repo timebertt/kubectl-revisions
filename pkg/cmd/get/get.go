@@ -38,8 +38,8 @@ func NewCommand(f util.Factory, streams genericclioptions.IOStreams) *cobra.Comm
 		Use:     "get (TYPE[.VERSION][.GROUP] NAME | TYPE[.VERSION][.GROUP]/NAME)",
 		Aliases: []string{"list", "ls"},
 
-		Short: "Get the rollout history of a workload resource",
-		Long: `Get the rollout history of a workload resource (Deployment, StatefulSet, or DaemonSet).
+		Short: "Get the revision history of a workload resource",
+		Long: `Get the revision history of a workload resource (Deployment, StatefulSet, or DaemonSet).
 
  The history is based on the ReplicaSets/ControllerRevisions still in the system. I.e., the history is limited by the
 configured revisionHistoryLimit.
@@ -48,13 +48,13 @@ configured revisionHistoryLimit.
 instead.
 `,
 		Example: `  # Get all revisions of the nginx Deployment
-  kubectl history get deploy nginx
+  kubectl revisions get deploy nginx
   
   # Print additional columns like the revisions' images
-  kubectl history get deploy nginx -o wide
+  kubectl revisions get deploy nginx -o wide
   
   # Get the latest revision in YAML
-  kubectl history get deploy nginx --revision=-1 -o yaml`,
+  kubectl revisions get deploy nginx --revision=-1 -o yaml`,
 
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()

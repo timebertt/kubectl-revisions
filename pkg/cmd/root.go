@@ -32,7 +32,7 @@ func NewCommand() *cobra.Command {
 	o := NewOptions()
 
 	cmd := &cobra.Command{
-		Use:   "history",
+		Use:   "revisions",
 		Short: "Time-travel through your cluster",
 
 		PersistentPreRunE: func(*cobra.Command, []string) error {
@@ -92,14 +92,14 @@ func NewCommand() *cobra.Command {
 // I.e., the default template would output:
 //
 //	Usage:
-//	  history [command]
+//	  revisions [command]
 //
 // The modified template outputs:
 //
 //	Usage:
-//	  kubectl history [command]
+//	  kubectl revisions [command]
 //
-// Changing cmd.Use to `kubectl history` makes cobra remove `history` from all command paths and use lines.
+// Changing cmd.Use to `kubectl revisions` makes cobra remove `revisions` from all command paths and use lines.
 func customizeUsageTemplate(cmd *cobra.Command) {
 	defaultTmpl := cmd.UsageTemplate()
 

@@ -2,7 +2,7 @@ export_artifacts() {
   [ -n "${ARTIFACTS:-}" ] || return 0
 
   mkdir -p "$ARTIFACTS"
-  cluster_name=history
+  cluster_name=revisions
   echo "> Exporting logs of kind cluster '$cluster_name'"
   kind export logs "$ARTIFACTS" --name "$cluster_name" || true
 
