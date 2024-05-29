@@ -12,6 +12,14 @@ It gives more output than `kubectl rollout history` and is easier to use than `k
 
 ## Installation
 
+Using [krew](https://krew.sigs.k8s.io/) (recommended):
+
+```bash
+kubectl krew install revisions
+```
+
+Using go:
+
 ```bash
 go install github.com/timebertt/kubectl-revisions@latest
 ```
