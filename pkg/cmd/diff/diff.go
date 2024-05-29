@@ -86,14 +86,10 @@ files as empty) options.`,
   KUBECTL_EXTERNAL_DIFF="code --diff --wait" kubectl revisions diff deploy nginx
 `,
 
-		RunE: func(cmd *cobra.Command, args []string) error {
-			ctx := cmd.Context()
-
+		Run: func(cmd *cobra.Command, args []string) {
 			cmdutil.CheckErr(o.Complete(f))
 			cmdutil.CheckErr(o.Validate())
-			cmdutil.CheckErr(o.Run(ctx, f, args))
-
-			return nil
+			cmdutil.CheckErr(o.Run(cmd.Context(), f, args))
 		},
 	}
 

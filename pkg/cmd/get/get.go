@@ -56,14 +56,10 @@ instead.
   # Get the latest revision in YAML
   kubectl revisions get deploy nginx --revision=-1 -o yaml`,
 
-		RunE: func(cmd *cobra.Command, args []string) error {
-			ctx := cmd.Context()
-
+		Run: func(cmd *cobra.Command, args []string) {
 			cmdutil.CheckErr(o.Complete(f))
 			cmdutil.CheckErr(o.Validate())
-			cmdutil.CheckErr(o.Run(ctx, f, args))
-
-			return nil
+			cmdutil.CheckErr(o.Run(cmd.Context(), f, args))
 		},
 	}
 
