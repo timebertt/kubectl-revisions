@@ -13,6 +13,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
 )
 
+// SupportedKinds is a list of object kinds supported by this package.
+var SupportedKinds = []string{"Deployment", "StatefulSet", "DaemonSet"}
+
 // History is a kind-specific client that knows how to access the revision history of objects of that kind.
 // Instantiate a History with For or ForGroupKind.
 type History interface {

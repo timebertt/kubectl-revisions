@@ -44,14 +44,14 @@ func NewCommand(streams genericclioptions.IOStreams) *cobra.Command {
 Note that the version string's format can be different depending on how the binary was built.
 E.g, release builds inject the version via -ldflags, while installing with 'go install' injects
 the go module's version (which can also be "(devel)").`,
-		RunE: func(*cobra.Command, []string) error {
+
+		Args: cobra.NoArgs,
+		Run: func(*cobra.Command, []string) {
 			if version == "" {
 				_, _ = fmt.Fprintln(o.Out, "could not determine build information")
 			} else {
 				_, _ = fmt.Fprintf(o.Out, "kubectl-revisions %s\n", version)
 			}
-
-			return nil
 		},
 	}
 }

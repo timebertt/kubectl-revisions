@@ -7,8 +7,11 @@ import (
 	"github.com/spf13/cobra"
 	"k8s.io/cli-runtime/pkg/genericclioptions"
 	"k8s.io/client-go/rest"
+	cmdutil "k8s.io/kubectl/pkg/cmd/util"
+	utilcomp "k8s.io/kubectl/pkg/util/completion"
 	"k8s.io/kubectl/pkg/util/term"
 
+	"github.com/timebertt/kubectl-revisions/pkg/cmd/completion"
 	"github.com/timebertt/kubectl-revisions/pkg/cmd/diff"
 	"github.com/timebertt/kubectl-revisions/pkg/cmd/get"
 	"github.com/timebertt/kubectl-revisions/pkg/cmd/util"
@@ -42,9 +45,9 @@ func NewCommand() *cobra.Command {
 		},
 
 		CompletionOptions: cobra.CompletionOptions{
-			// Supporting shell completion for a kubectl plugin is a bit more difficult than using cobra's default generated
-			// completion as the plugin will not be called by its name directly but via `kubectl <plugin-name>`.
-			// Until that is implemented properly, disable the default completion command to prevent confusion.
+			// Supporting shell completion for a kubectl plugin requires a dedicated completion executable.
+			// Disable cobra's completion command in favor of a custom completion command that explains how to set up
+			// completion.
 			DisableDefaultCmd: true,
 		},
 	}
@@ -73,15 +76,21 @@ func NewCommand() *cobra.Command {
 		Title: "Other Commands:",
 	}
 	cmd.AddGroup(otherGroup)
-
-	cmd.SetCompletionCommandGroupID(otherGroup.ID)
 	cmd.SetHelpCommandGroupID(otherGroup.ID)
 
-	versionCmd := version.NewCommand(o.IOStreams)
-	versionCmd.GroupID = otherGroup.ID
-	cmd.AddCommand(versionCmd)
+	for _, subcommand := range []*cobra.Command{
+		completion.NewCommand(o.IOStreams),
+		version.NewCommand(o.IOStreams),
+	} {
+		subcommand.GroupID = otherGroup.ID
+		cmd.AddCommand(subcommand)
+		hideGlobalFlagsInUsage(cmd)
+	}
 
 	customizeUsageTemplate(cmd)
+
+	utilcomp.SetFactoryForCompletion(f)
+	registerCompletionFuncForGlobalFlags(cmd, f)
 
 	return cmd
 }
@@ -107,4 +116,39 @@ func customizeUsageTemplate(cmd *cobra.Command) {
 	tmpl := r.ReplaceAllString(defaultTmpl, `$1(printf "kubectl %s" $2)$3`)
 
 	cmd.SetUsageTemplate(tmpl)
+}
+
+// hideGlobalFlagsInUsage customizes the help output of subcommands to skip the global flags section.
+// The function should be called after adding the subcommand to the parent command, otherwise the customization from
+// customizeUsageTemplate will be lost.
+func hideGlobalFlagsInUsage(cmd *cobra.Command) {
+	defaultTmpl := cmd.UsageTemplate()
+
+	r := regexp.MustCompile(`([{ ]).HasAvailableInheritedFlags([} ])`)
+	tmpl := r.ReplaceAllString(defaultTmpl, `${1}false${2}`)
+
+	cmd.SetUsageTemplate(tmpl)
+}
+
+func registerCompletionFuncForGlobalFlags(cmd *cobra.Command, f cmdutil.Factory) {
+	cmdutil.CheckErr(cmd.RegisterFlagCompletionFunc(
+		"namespace",
+		func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+			return utilcomp.CompGetResource(f, "namespace", toComplete), cobra.ShellCompDirectiveNoFileComp
+		}))
+	cmdutil.CheckErr(cmd.RegisterFlagCompletionFunc(
+		"context",
+		func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+			return utilcomp.ListContextsInConfig(toComplete), cobra.ShellCompDirectiveNoFileComp
+		}))
+	cmdutil.CheckErr(cmd.RegisterFlagCompletionFunc(
+		"cluster",
+		func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+			return utilcomp.ListClustersInConfig(toComplete), cobra.ShellCompDirectiveNoFileComp
+		}))
+	cmdutil.CheckErr(cmd.RegisterFlagCompletionFunc(
+		"user",
+		func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+			return utilcomp.ListUsersInConfig(toComplete), cobra.ShellCompDirectiveNoFileComp
+		}))
 }

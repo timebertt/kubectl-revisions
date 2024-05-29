@@ -9,6 +9,7 @@ import (
 	"k8s.io/cli-runtime/pkg/genericclioptions"
 	"k8s.io/cli-runtime/pkg/printers"
 	kubectlget "k8s.io/kubectl/pkg/cmd/get"
+	"k8s.io/kubectl/pkg/cmd/util"
 	"k8s.io/kubectl/pkg/scheme"
 
 	"github.com/timebertt/kubectl-revisions/pkg/printer"
@@ -48,6 +49,18 @@ func (f *PrintFlags) AddFlags(cmd *cobra.Command) {
 	f.CustomColumnsFlags.AddFlags(cmd)
 
 	cmd.Flags().Lookup("output").Usage = f.OutputUsage()
+	util.CheckErr(cmd.RegisterFlagCompletionFunc(
+		"output",
+		func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+			var comps []string
+			for _, format := range f.AllowedFormats() {
+				if strings.HasPrefix(format, toComplete) {
+					comps = append(comps, format)
+				}
+			}
+			return comps, cobra.ShellCompDirectiveNoFileComp
+		},
+	))
 
 	cmd.Flags().BoolVar(&f.TemplateOnly, "template-only", f.TemplateOnly, "If false, print the full revision object (e.g., ReplicaSet) instead of only the pod template.")
 }
