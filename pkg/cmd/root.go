@@ -7,6 +7,8 @@ import (
 	"github.com/spf13/cobra"
 	"k8s.io/cli-runtime/pkg/genericclioptions"
 	"k8s.io/client-go/rest"
+	cmdutil "k8s.io/kubectl/pkg/cmd/util"
+	utilcomp "k8s.io/kubectl/pkg/util/completion"
 	"k8s.io/kubectl/pkg/util/term"
 
 	"github.com/timebertt/kubectl-revisions/pkg/cmd/diff"
@@ -83,6 +85,9 @@ func NewCommand() *cobra.Command {
 
 	customizeUsageTemplate(cmd)
 
+	utilcomp.SetFactoryForCompletion(f)
+	registerCompletionFuncForGlobalFlags(cmd, f)
+
 	return cmd
 }
 
@@ -107,4 +112,27 @@ func customizeUsageTemplate(cmd *cobra.Command) {
 	tmpl := r.ReplaceAllString(defaultTmpl, `$1(printf "kubectl %s" $2)$3`)
 
 	cmd.SetUsageTemplate(tmpl)
+}
+
+func registerCompletionFuncForGlobalFlags(cmd *cobra.Command, f cmdutil.Factory) {
+	cmdutil.CheckErr(cmd.RegisterFlagCompletionFunc(
+		"namespace",
+		func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+			return utilcomp.CompGetResource(f, "namespace", toComplete), cobra.ShellCompDirectiveNoFileComp
+		}))
+	cmdutil.CheckErr(cmd.RegisterFlagCompletionFunc(
+		"context",
+		func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+			return utilcomp.ListContextsInConfig(toComplete), cobra.ShellCompDirectiveNoFileComp
+		}))
+	cmdutil.CheckErr(cmd.RegisterFlagCompletionFunc(
+		"cluster",
+		func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+			return utilcomp.ListClustersInConfig(toComplete), cobra.ShellCompDirectiveNoFileComp
+		}))
+	cmdutil.CheckErr(cmd.RegisterFlagCompletionFunc(
+		"user",
+		func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+			return utilcomp.ListUsersInConfig(toComplete), cobra.ShellCompDirectiveNoFileComp
+		}))
 }

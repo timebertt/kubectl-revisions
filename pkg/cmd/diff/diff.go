@@ -11,6 +11,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/cli-runtime/pkg/genericclioptions"
 	cmdutil "k8s.io/kubectl/pkg/cmd/util"
+	utilcomp "k8s.io/kubectl/pkg/util/completion"
 	"k8s.io/utils/exec"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -86,6 +87,7 @@ files as empty) options.`,
   KUBECTL_EXTERNAL_DIFF="code --diff --wait" kubectl revisions diff deploy nginx
 `,
 
+		ValidArgsFunction: utilcomp.SpecifiedResourceTypeAndNameNoRepeatCompletionFunc(f, util.Map(history.SupportedKinds, strings.ToLower)),
 		Run: func(cmd *cobra.Command, args []string) {
 			cmdutil.CheckErr(o.Complete(f))
 			cmdutil.CheckErr(o.Validate())

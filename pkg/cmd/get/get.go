@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/cobra"
 	"k8s.io/cli-runtime/pkg/genericclioptions"
 	cmdutil "k8s.io/kubectl/pkg/cmd/util"
+	utilcomp "k8s.io/kubectl/pkg/util/completion"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/timebertt/kubectl-revisions/pkg/cmd/util"
@@ -56,6 +57,7 @@ instead.
   # Get the latest revision in YAML
   kubectl revisions get deploy nginx --revision=-1 -o yaml`,
 
+		ValidArgsFunction: utilcomp.SpecifiedResourceTypeAndNameNoRepeatCompletionFunc(f, util.Map(history.SupportedKinds, strings.ToLower)),
 		Run: func(cmd *cobra.Command, args []string) {
 			cmdutil.CheckErr(o.Complete(f))
 			cmdutil.CheckErr(o.Validate())
