@@ -88,13 +88,13 @@ comparing revisions 2 and 3 of deployment.apps/nginx
 
 The `k revisions diff` command uses `diff -u -N` to compare revisions by default.
 It also respects the `KUBECTL_EXTERNAL_DIFF` environment variable like the `kubectl diff` command.
-To get a nicer diff view, you can use one of these:
+To get a nicer diff output, you can use one of these:
 
 ```bash
-# Add color to the diff output
-k revisions diff deploy nginx | colordiff
-# Specify an external diff programm
-KUBECTL_EXTERNAL_DIFF="colordiff -u" k revisions diff deploy nginx
+# Use a colored external diff program
+export KUBECTL_EXTERNAL_DIFF="colordiff -u"
+# Use dyff as a rich diff program
+export KUBECTL_EXTERNAL_DIFF="dyff between --omit-header"
 # Show diff in VS Code
-KUBECTL_EXTERNAL_DIFF="code --diff --wait" k revisions diff deploy nginx
+export KUBECTL_EXTERNAL_DIFF="code --diff --wait"
 ```

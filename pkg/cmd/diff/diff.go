@@ -77,11 +77,11 @@ files as empty) options.`,
   # Compare the previous revision and the revision before that
   kubectl revisions diff deploy nginx --revision=-2
   
-  # Add color to the diff output
-  kubectl revisions diff deploy nginx | colordiff
-  
-  # Specify an external diff programm
+  # Use a colored external diff program
   KUBECTL_EXTERNAL_DIFF="colordiff -u" kubectl revisions diff deploy nginx
+  
+  # Use dyff as a rich diff program
+  KUBECTL_EXTERNAL_DIFF="dyff between --omit-header" kubectl revisions diff deploy nginx
   
   # Show diff in VS Code
   KUBECTL_EXTERNAL_DIFF="code --diff --wait" kubectl revisions diff deploy nginx
