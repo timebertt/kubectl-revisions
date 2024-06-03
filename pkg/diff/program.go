@@ -6,9 +6,9 @@ import (
 	"k8s.io/utils/exec"
 )
 
-// Program is a diff programm that compares two files.
+// Program is a diff program that compares two files.
 type Program interface {
-	// Run executes the diff programm to compare the given files.
+	// Run executes the diff program to compare the given files.
 	Run(a, b string) error
 }
 

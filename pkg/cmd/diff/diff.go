@@ -202,8 +202,9 @@ func (o *Options) Run(ctx context.Context, f util.Factory, args []string) (err e
 		return err
 	}
 
-	// prepare files for diff programm
-	files, err := diff.NewFiles(kindString+"_"+info.Name, ToFileName(a), ToFileName(b))
+	// prepare files for diff program
+	fileName := kindString + "." + info.Namespace + "." + info.Name
+	files, err := diff.NewFiles(ToDirName(a), ToDirName(b))
 	if err != nil {
 		return err
 	}
@@ -220,22 +221,15 @@ func (o *Options) Run(ctx context.Context, f util.Factory, args []string) (err e
 		return err
 	}
 
-	if err := p.PrintObj(a, files.A); err != nil {
+	if err := files.From.Print(fileName, a, p); err != nil {
 		return err
 	}
-	if err := files.A.Close(); err != nil {
-		return err
-	}
-
-	if err := p.PrintObj(b, files.B); err != nil {
-		return err
-	}
-	if err := files.B.Close(); err != nil {
+	if err := files.To.Print(fileName, b, p); err != nil {
 		return err
 	}
 
-	// run diff programm against prepared files
-	if err := o.Diff.Run(files.A.Name(), files.B.Name()); err != nil {
+	// run diff program against prepared files
+	if err := o.Diff.Run(files.From.Dir, files.To.Dir); err != nil {
 		// don't propagate exit status 1 (signaling a diff) upwards and exit cleanly instead
 		// there will always be a diff between revisions, there is no point in checking that
 		var exitError exec.ExitError
@@ -248,7 +242,7 @@ func (o *Options) Run(ctx context.Context, f util.Factory, args []string) (err e
 	return nil
 }
 
-// ToFileName returns a name for a file which the given revision should be written to.
-func ToFileName(rev history.Revision) string {
+// ToDirName returns a name for a directory which the given revision should be written to.
+func ToDirName(rev history.Revision) string {
 	return fmt.Sprintf("%d-%s", rev.Number(), rev.Name())
 }
