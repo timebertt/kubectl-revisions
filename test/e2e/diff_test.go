@@ -111,6 +111,23 @@ var _ = Describe("diff command", func() {
 				Eventually(session).Should(Say(`/2-nginx-`))
 				Eventually(session).Should(Say(`.` + namespace + `.nginx\n`))
 			})
+
+			It("should invoke dyff as external diff program with subcommand and flags", func() {
+				workload.BumpImage(object)
+
+				cmd := NewPluginCommand(args...)
+				// dyff has some special integration in place that makes it compatible with `kubectl diff`. See
+				// https://github.com/homeport/dyff/pull/149
+				// Add a dedicated test that ensures `kubectl revisions diff` works with the recommended setup for using `dyff`
+				// with kubectl, i.e., that it works with the same KUBECTL_EXTERNAL_DIFF setting.
+				cmd.Env = append(cmd.Env, "KUBECTL_EXTERNAL_DIFF=dyff between --omit-header --set-exit-code")
+
+				session := Wait(RunCommand(cmd))
+				Eventually(session).Should(Say(`spec.containers.nginx.image\n`))
+				Eventually(session).Should(Say(`value change\n`))
+				Eventually(session).Should(Say(`-.+:0.1\n`))
+				Eventually(session).Should(Say(`\+.+:0.2\n`))
+			})
 		})
 	}
 

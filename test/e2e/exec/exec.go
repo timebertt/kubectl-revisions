@@ -64,6 +64,7 @@ func preparePath() {
 	for _, externalBinary := range []string{
 		"diff", // diff is used as the default external diff command
 		"ls",   // ls is used as an alternative external "diff" command
+		"dyff", // dyff is used as an alternative external diff command
 	} {
 		binPath, err := exec.LookPath(externalBinary)
 		Expect(err).NotTo(HaveOccurred(), "%s is required in PATH for e2e tests", externalBinary)

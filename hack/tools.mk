@@ -18,6 +18,12 @@ $(TOOLS_BIN_DIR)/.version_%:
 	@version_file=$@; rm -f $${version_file%_*}*
 	@touch $@
 
+DYFF := $(TOOLS_BIN_DIR)/dyff
+# renovate: datasource=github-releases depName=homeport/dyff
+DYFF_VERSION ?= 1.7.1
+$(DYFF): $(call tool_version_file,$(DYFF),$(DYFF_VERSION))
+	curl -sSfL https://github.com/homeport/dyff/releases/download/v$(DYFF_VERSION)/dyff_$(DYFF_VERSION)_$(shell uname -s | tr '[:upper:]' '[:lower:]')_$(shell uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/').tar.gz | tar -xzmf - -C $(TOOLS_BIN_DIR) dyff
+
 GINKGO := $(TOOLS_BIN_DIR)/ginkgo
 GINKGO_VERSION ?= $(call version_gomod,github.com/onsi/ginkgo/v2)
 $(GINKGO): $(call tool_version_file,$(GINKGO),$(GINKGO_VERSION))
