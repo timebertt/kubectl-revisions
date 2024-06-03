@@ -20,6 +20,9 @@ builds:
   - -s -w
   - -X github.com/timebertt/kubectl-revisions/pkg/cmd/version.version=v{{ .Version }}
 
+checksum:
+  name_template: "{{ .ProjectName }}_v{{ .Version }}_checksums.txt"
+
 archives:
 - format: tar.gz
   name_template: "{{ .ProjectName }}_v{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}"
