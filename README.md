@@ -24,6 +24,12 @@ Using go:
 go install github.com/timebertt/kubectl-revisions@latest
 ```
 
+Learn how to set up shell completion:
+
+```bash
+kubectl revisions completion -h
+```
+
 ## Usage
 
 ### `k revisions get` / `k revisions list`
