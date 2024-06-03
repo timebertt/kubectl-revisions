@@ -75,7 +75,11 @@ func preparePath() {
 func NewPluginCommand(args ...string) *exec.Cmd {
 	// nolint:gosec // no security risk in shared test code
 	command := exec.Command("kubectl", append([]string{"revisions"}, args...)...)
-	command.Env = append(command.Environ(), "PATH="+tmpPath)
+	command.Env = append(command.Environ(),
+		"PATH="+tmpPath,
+		// reset the external diff env in case it is set on the developer's machine
+		"KUBECTL_EXTERNAL_DIFF=",
+	)
 
 	return command
 }
