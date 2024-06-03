@@ -1,7 +1,7 @@
 package diff
 
 import (
-	"k8s.io/cli-runtime/pkg/genericclioptions"
+	"k8s.io/cli-runtime/pkg/genericiooptions"
 	kubectldiff "k8s.io/kubectl/pkg/cmd/diff"
 	"k8s.io/utils/exec"
 )
@@ -14,7 +14,7 @@ type Program interface {
 
 // NewProgram returns kubectl's default Program implementation that respects the KUBECTL_EXTERNAL_DIFF environment
 // variable. It falls back to `diff -u -N` if the env var is unset.
-func NewProgram(streams genericclioptions.IOStreams) Program {
+func NewProgram(streams genericiooptions.IOStreams) Program {
 	return &kubectldiff.DiffProgram{
 		Exec:      exec.New(),
 		IOStreams: streams,

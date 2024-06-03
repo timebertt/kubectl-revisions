@@ -5,7 +5,7 @@ import (
 	"runtime/debug"
 
 	"github.com/spf13/cobra"
-	"k8s.io/cli-runtime/pkg/genericclioptions"
+	"k8s.io/cli-runtime/pkg/genericiooptions"
 )
 
 // version can be set via:
@@ -24,16 +24,16 @@ func init() {
 }
 
 type Options struct {
-	genericclioptions.IOStreams
+	genericiooptions.IOStreams
 }
 
-func NewOptions(streams genericclioptions.IOStreams) *Options {
+func NewOptions(streams genericiooptions.IOStreams) *Options {
 	return &Options{
 		IOStreams: streams,
 	}
 }
 
-func NewCommand(streams genericclioptions.IOStreams) *cobra.Command {
+func NewCommand(streams genericiooptions.IOStreams) *cobra.Command {
 	o := NewOptions(streams)
 
 	return &cobra.Command{

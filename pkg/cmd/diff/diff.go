@@ -9,7 +9,7 @@ import (
 
 	"github.com/spf13/cobra"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/cli-runtime/pkg/genericclioptions"
+	"k8s.io/cli-runtime/pkg/genericiooptions"
 	cmdutil "k8s.io/kubectl/pkg/cmd/util"
 	utilcomp "k8s.io/kubectl/pkg/util/completion"
 	"k8s.io/utils/exec"
@@ -22,7 +22,7 @@ import (
 )
 
 type Options struct {
-	genericclioptions.IOStreams
+	genericiooptions.IOStreams
 
 	Namespace  string
 	Revisions  []int64
@@ -31,7 +31,7 @@ type Options struct {
 	Diff diff.Program
 }
 
-func NewOptions(streams genericclioptions.IOStreams) *Options {
+func NewOptions(streams genericiooptions.IOStreams) *Options {
 	printFlags := util.NewPrintFlags()
 	printFlags.WithDefaultOutput("yaml")
 	printFlags.TemplateOnly = true
@@ -47,7 +47,7 @@ func NewOptions(streams genericclioptions.IOStreams) *Options {
 	}
 }
 
-func NewCommand(f util.Factory, streams genericclioptions.IOStreams) *cobra.Command {
+func NewCommand(f util.Factory, streams genericiooptions.IOStreams) *cobra.Command {
 	o := NewOptions(streams)
 
 	cmd := &cobra.Command{

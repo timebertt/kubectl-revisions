@@ -6,10 +6,11 @@ import (
 
 	"github.com/spf13/cobra"
 	"k8s.io/cli-runtime/pkg/genericclioptions"
+	"k8s.io/cli-runtime/pkg/genericiooptions"
+	"k8s.io/cli-runtime/pkg/printers"
 	"k8s.io/client-go/rest"
 	cmdutil "k8s.io/kubectl/pkg/cmd/util"
 	utilcomp "k8s.io/kubectl/pkg/util/completion"
-	"k8s.io/kubectl/pkg/util/term"
 
 	"github.com/timebertt/kubectl-revisions/pkg/cmd/completion"
 	"github.com/timebertt/kubectl-revisions/pkg/cmd/diff"
@@ -19,14 +20,14 @@ import (
 )
 
 type Options struct {
-	genericclioptions.IOStreams
+	genericiooptions.IOStreams
 
 	ConfigFlags *genericclioptions.ConfigFlags
 }
 
 func NewOptions() *Options {
 	return &Options{
-		IOStreams:   genericclioptions.IOStreams{In: os.Stdin, Out: os.Stdout, ErrOut: os.Stderr},
+		IOStreams:   genericiooptions.IOStreams{In: os.Stdin, Out: os.Stdout, ErrOut: os.Stderr},
 		ConfigFlags: genericclioptions.NewConfigFlags(true).WithDeprecatedPasswordFlag().WithDiscoveryBurst(300).WithDiscoveryQPS(50.0),
 	}
 }
@@ -39,7 +40,7 @@ func NewCommand() *cobra.Command {
 		Short: "Time-travel through your workload revision history",
 
 		PersistentPreRunE: func(*cobra.Command, []string) error {
-			warningHandler := rest.NewWarningWriter(o.IOStreams.ErrOut, rest.WarningWriterOptions{Deduplicate: true, Color: term.AllowsColorOutput(o.IOStreams.ErrOut)})
+			warningHandler := rest.NewWarningWriter(o.IOStreams.ErrOut, rest.WarningWriterOptions{Deduplicate: true, Color: printers.AllowsColorOutput(o.IOStreams.ErrOut)})
 			rest.SetDefaultWarningHandler(warningHandler)
 			return nil
 		},

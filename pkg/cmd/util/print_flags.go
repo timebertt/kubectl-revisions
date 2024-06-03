@@ -74,12 +74,12 @@ func (f *PrintFlags) OutputUsage() string {
 	if f.CustomColumnsFlags != nil {
 		usage += "custom columns [https://kubernetes.io/docs/reference/kubectl/#custom-columns], "
 	}
-	usage += "golang template [http://golang.org/pkg/text/template/#pkg-overview] and jsonpath template [https://kubernetes.io/docs/reference/kubectl/jsonpath/]."
+	usage += "golang template [https://golang.org/pkg/text/template/#pkg-overview] and jsonpath template [https://kubernetes.io/docs/reference/kubectl/jsonpath/]."
 
 	return usage
 }
 
-// SetKind sets the Kind option of humanreadable flags
+// SetKind sets the Kind option of human-readable flags
 func (f *PrintFlags) SetKind(kind schema.GroupKind) {
 	f.TableFlags.SetKind(kind)
 }
