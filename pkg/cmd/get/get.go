@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
-	"k8s.io/cli-runtime/pkg/genericclioptions"
+	"k8s.io/cli-runtime/pkg/genericiooptions"
 	cmdutil "k8s.io/kubectl/pkg/cmd/util"
 	utilcomp "k8s.io/kubectl/pkg/util/completion"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -16,14 +16,14 @@ import (
 )
 
 type Options struct {
-	genericclioptions.IOStreams
+	genericiooptions.IOStreams
 
 	Namespace  string
 	Revision   int64
 	PrintFlags *util.PrintFlags
 }
 
-func NewOptions(streams genericclioptions.IOStreams) *Options {
+func NewOptions(streams genericiooptions.IOStreams) *Options {
 	printFlags := util.NewPrintFlags()
 
 	return &Options{
@@ -32,7 +32,7 @@ func NewOptions(streams genericclioptions.IOStreams) *Options {
 	}
 }
 
-func NewCommand(f util.Factory, streams genericclioptions.IOStreams) *cobra.Command {
+func NewCommand(f util.Factory, streams genericiooptions.IOStreams) *cobra.Command {
 	o := NewOptions(streams)
 
 	cmd := &cobra.Command{
