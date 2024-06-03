@@ -36,27 +36,16 @@ kubectl revisions completion -h
 
 Get the revision history of a workload resource (`Deployment`, `StatefulSet`, or `DaemonSet`).
 
+![Screenshot of kubectl revisions get](docs/assets/get.png)
+<!-- generated with:
+termshot --show-cmd -f docs/assets/get.png -- kubectl revisions get deploy nginx -owide
+-->
+
 The history is based on the `ReplicaSets`/`ControllerRevisions` still in the system. I.e., the history is limited by the
 configured `revisionHistoryLimit`.
 
 By default, all revisions are printed as a list. If the `--revision` flag is given, the selected revision is printed
 instead.
-
-```bash
-$ k revisions get deploy nginx -owide
-NAME               REVISION   AGE   CONTAINERS   IMAGES
-nginx-77b4fdf86c   1          22m   nginx        nginx
-nginx-7bf8c77b5b   2          21m   nginx        nginx:latest
-nginx-7bb88f5ff4   3          20m   nginx        nginx:1.24
-
-$ k revisions get deploy nginx -r -1 -oyaml
-apiVersion: apps/v1
-kind: ReplicaSet
-metadata:
-  name: nginx-7bb88f5ff4
-...
-```
-
 This is similar to using `k get replicaset` or `k get controllerrevision`, but allows easy selection of the relevant objects and returns a sorted list.
 This is also similar to `k rollout history`, but doesn't only print revision numbers.
 
@@ -65,26 +54,15 @@ This is also similar to `k rollout history`, but doesn't only print revision num
 Compare multiple revisions of a workload resource (`Deployment`, `StatefulSet`, or `DaemonSet`).
 A.k.a., "Why was my Deployment rolled?"
 
+![Screenshot of kubectl revisions diff](docs/assets/diff.png)
+<!-- generated with:
+termshot --show-cmd -f docs/assets/diff.png --edit -- kubectl revisions diff deploy nginx
+-->
+
 The history is based on the `ReplicaSets`/`ControllerRevisions` still in the system. I.e., the history is limited by the
 configured `revisionHistoryLimit`.
 
 By default, the latest two revisions are compared. The `--revision` flag allows selecting the revisions to compare.
-
-```bash
-$ k revisions diff deploy nginx
-comparing revisions 2 and 3 of deployment.apps/nginx
---- /var/folders/d8/x7ty7dh12sg7vrq374x52pk80000gq/T/deployment.apps_nginx-2577026088/2-nginx-7bf8c77b5b.yaml	2024-05-22 23:16:51
-+++ /var/folders/d8/x7ty7dh12sg7vrq374x52pk80000gq/T/deployment.apps_nginx-2577026088/3-nginx-7bb88f5ff4.yaml	2024-05-22 23:16:51
-@@ -7,7 +7,7 @@
-     app: nginx
- spec:
-   containers:
--  - image: nginx:latest
-+  - image: nginx:1.24
-     imagePullPolicy: Always
-     name: nginx
-     resources: {}
-```
 
 The `k revisions diff` command uses `diff -u -N` to compare revisions by default.
 It also respects the `KUBECTL_EXTERNAL_DIFF` environment variable like the `kubectl diff` command.
@@ -98,3 +76,10 @@ export KUBECTL_EXTERNAL_DIFF="dyff between --omit-header"
 # Show diff in VS Code
 export KUBECTL_EXTERNAL_DIFF="code --diff --wait"
 ```
+
+For example:
+
+![Screenshot of kubectl revisions diff using dyff](docs/assets/diff-dyff.png)
+<!-- generated with:
+termshot --show-cmd -f docs/assets/diff-dyff.png -- KUBECTL_EXTERNAL_DIFF='"dyff between --omit-header"' kubectl revisions diff deploy nginx
+-->
