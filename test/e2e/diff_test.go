@@ -98,19 +98,36 @@ var _ = Describe("diff command", func() {
 			Eventually(session).Should(Say(`\+.+:0.3\n`))
 		})
 
-		It("should diff the revisions using the external diff programm", func() {
-			workload.BumpImage(object)
+		Context("external diff", func() {
+			It("should invoke the external diff program", func() {
+				workload.BumpImage(object)
 
-			cmd := NewPluginCommand(args...)
-			cmd.Env = append(cmd.Env, "KUBECTL_EXTERNAL_DIFF=cat")
+				cmd := NewPluginCommand(args...)
+				cmd.Env = append(cmd.Env, "KUBECTL_EXTERNAL_DIFF=ls")
 
-			session := Wait(RunCommand(cmd))
-			Eventually(session).Should(Say(`---\n`))
-			Eventually(session).Should(Say(`kind: Pod\n`))
-			Eventually(session).Should(Say(`image: \S+:0.1\n`))
-			Eventually(session).Should(Say(`---\n`))
-			Eventually(session).Should(Say(`kind: Pod\n`))
-			Eventually(session).Should(Say(`image: \S+:0.2\n`))
+				session := Wait(RunCommand(cmd))
+				Eventually(session).Should(Say(`/1-nginx-`))
+				Eventually(session).Should(Say(`.` + namespace + `.nginx\n`))
+				Eventually(session).Should(Say(`/2-nginx-`))
+				Eventually(session).Should(Say(`.` + namespace + `.nginx\n`))
+			})
+
+			It("should invoke dyff as external diff program with subcommand and flags", func() {
+				workload.BumpImage(object)
+
+				cmd := NewPluginCommand(args...)
+				// dyff has some special integration in place that makes it compatible with `kubectl diff`. See
+				// https://github.com/homeport/dyff/pull/149
+				// Add a dedicated test that ensures `kubectl revisions diff` works with the recommended setup for using `dyff`
+				// with kubectl, i.e., that it works with the same KUBECTL_EXTERNAL_DIFF setting.
+				cmd.Env = append(cmd.Env, "KUBECTL_EXTERNAL_DIFF=dyff between --omit-header --set-exit-code")
+
+				session := Wait(RunCommand(cmd))
+				Eventually(session).Should(Say(`spec.containers.nginx.image\n`))
+				Eventually(session).Should(Say(`value change\n`))
+				Eventually(session).Should(Say(`-.+:0.1\n`))
+				Eventually(session).Should(Say(`\+.+:0.2\n`))
+			})
 		})
 	}
 
@@ -174,35 +191,15 @@ var _ = Describe("diff command", func() {
 		It("should diff the full revision objects on --template-only=false", func() {
 			workload.BumpImage(object)
 
-			cmd := NewPluginCommand(append(args, "--template-only=false")...)
-			cmd.Env = append(cmd.Env, "KUBECTL_EXTERNAL_DIFF=cat")
-
-			session := Wait(RunCommand(cmd))
-			Eventually(session).Should(Say(`---\n`))
-			Eventually(session).Should(Say(`kind: ReplicaSet\n`))
-			Eventually(session).Should(Say(`image: \S+:0.1\n`))
-			Eventually(session).Should(Say(`---\n`))
-			Eventually(session).Should(Say(`kind: ReplicaSet\n`))
-			Eventually(session).Should(Say(`image: \S+:0.2\n`))
+			session := Wait(RunCommand(NewPluginCommand(append(args, "--template-only=false")...)))
+			Eventually(session).Should(Say(`-.+deployment.kubernetes.io/revision: "1"`))
+			Eventually(session).Should(Say(`\+.+deployment.kubernetes.io/revision: "2"`))
+			Eventually(session).Should(Say(`-.+pod-template-hash: `))
+			Eventually(session).Should(Say(`\+.+pod-template-hash: `))
+			Eventually(session).Should(Say(`-.+:0.1\n`))
+			Eventually(session).Should(Say(`\+.+:0.2\n`))
 		})
 	})
-
-	testControllerRevision := func() {
-		It("should diff the full revision objects on --template-only=false", func() {
-			workload.BumpImage(object)
-
-			cmd := NewPluginCommand(append(args, "--template-only=false")...)
-			cmd.Env = append(cmd.Env, "KUBECTL_EXTERNAL_DIFF=cat")
-
-			session := Wait(RunCommand(cmd))
-			Eventually(session).Should(Say(`---\n`))
-			Eventually(session).Should(Say(`image: \S+:0.1\n`))
-			Eventually(session).Should(Say(`kind: ControllerRevision\n`))
-			Eventually(session).Should(Say(`---\n`))
-			Eventually(session).Should(Say(`image: \S+:0.2\n`))
-			Eventually(session).Should(Say(`kind: ControllerRevision\n`))
-		})
-	}
 
 	Context("StatefulSet", func() {
 		BeforeEach(func() {
@@ -212,7 +209,17 @@ var _ = Describe("diff command", func() {
 
 		testCommon()
 
-		testControllerRevision()
+		It("should diff the full revision objects on --template-only=false", func() {
+			workload.BumpImage(object)
+
+			session := Wait(RunCommand(NewPluginCommand(append(args, "--template-only=false")...)))
+			Eventually(session).Should(Say(`-.+:0.1\n`))
+			Eventually(session).Should(Say(`\+.+:0.2\n`))
+			Eventually(session).Should(Say(`-.+controller.kubernetes.io/hash: `))
+			Eventually(session).Should(Say(`\+.+controller.kubernetes.io/hash: `))
+			Eventually(session).Should(Say(`-revision: 1`))
+			Eventually(session).Should(Say(`\+revision: 2`))
+		})
 	})
 
 	Context("DaemonSet", func() {
@@ -223,6 +230,16 @@ var _ = Describe("diff command", func() {
 
 		testCommon()
 
-		testControllerRevision()
+		It("should diff the full revision objects on --template-only=false", func() {
+			workload.BumpImage(object)
+
+			session := Wait(RunCommand(NewPluginCommand(append(args, "--template-only=false")...)))
+			Eventually(session).Should(Say(`-.+:0.1\n`))
+			Eventually(session).Should(Say(`\+.+:0.2\n`))
+			Eventually(session).Should(Say(`-.+controller-revision-hash: `))
+			Eventually(session).Should(Say(`\+.+controller-revision-hash: `))
+			Eventually(session).Should(Say(`-revision: 1`))
+			Eventually(session).Should(Say(`\+revision: 2`))
+		})
 	})
 })

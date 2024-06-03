@@ -57,7 +57,7 @@ GINKGO_FLAGS ?=
 TEST_FLAGS ?=
 
 .PHONY: test-e2e
-test-e2e: $(GINKGO) $(KUBECTL) ## Run e2e tests.
+test-e2e: $(GINKGO) $(KUBECTL) $(DYFF) ## Run e2e tests.
 	ginkgo run --timeout=10m --poll-progress-after=10s --poll-progress-interval=5s --randomize-all --randomize-suites --keep-going --show-node-events $(GINKGO_FLAGS) ./test/e2e/... -- $(TEST_FLAGS)
 
 ##@ Verification
