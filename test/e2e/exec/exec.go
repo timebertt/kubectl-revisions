@@ -60,15 +60,15 @@ func preparePath() {
 	Expect(err).NotTo(HaveOccurred())
 	Expect(os.Symlink(absoluteBinaryPath, filepath.Join(tmpPath, "kubectl-revisions"))).To(Succeed())
 
-	// diff is used as an external diff command
-	diffPath, err := exec.LookPath("diff")
-	Expect(err).NotTo(HaveOccurred(), "diff is required in PATH for e2e tests")
-	Expect(os.Symlink(diffPath, filepath.Join(tmpPath, "diff"))).To(Succeed())
-
-	// cat is used as an alternative external "diff" command
-	catPath, err := exec.LookPath("cat")
-	Expect(err).NotTo(HaveOccurred(), "cat is required in PATH for e2e tests")
-	Expect(os.Symlink(catPath, filepath.Join(tmpPath, "cat"))).To(Succeed())
+	// symlink external binaries needed by e2e tests
+	for _, externalBinary := range []string{
+		"diff", // diff is used as the default external diff command
+		"ls",   // ls is used as an alternative external "diff" command
+	} {
+		binPath, err := exec.LookPath(externalBinary)
+		Expect(err).NotTo(HaveOccurred(), "%s is required in PATH for e2e tests", externalBinary)
+		Expect(os.Symlink(binPath, filepath.Join(tmpPath, externalBinary))).To(Succeed())
+	}
 }
 
 func NewPluginCommand(args ...string) *exec.Cmd {
