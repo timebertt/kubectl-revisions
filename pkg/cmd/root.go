@@ -39,6 +39,14 @@ func NewCommand() *cobra.Command {
 		Use:   "revisions",
 		Short: "Time-travel through your workload revision history",
 
+		Annotations: map[string]string{
+			// Setting the following annotation makes sure the plugin's help output always has the `kubectl ` command prefix
+			// before the plugin's command path to match the expected command path when it is executed via kubectl.
+			// This implements https://krew.sigs.k8s.io/docs/developer-guide/develop/best-practices/#help-messages.
+			// Changing cmd.Use to `kubectl revisions` makes cobra remove `revisions` from all command paths and use lines.
+			cobra.CommandDisplayNameAnnotation: "kubectl revisions",
+		},
+
 		PersistentPreRunE: func(*cobra.Command, []string) error {
 			warningHandler := rest.NewWarningWriter(o.IOStreams.ErrOut, rest.WarningWriterOptions{Deduplicate: true, Color: printers.AllowsColorOutput(o.IOStreams.ErrOut)})
 			rest.SetDefaultWarningHandler(warningHandler)
@@ -88,35 +96,10 @@ func NewCommand() *cobra.Command {
 		hideGlobalFlagsInUsage(cmd)
 	}
 
-	customizeUsageTemplate(cmd)
-
 	utilcomp.SetFactoryForCompletion(f)
 	registerCompletionFuncForGlobalFlags(cmd, f)
 
 	return cmd
-}
-
-// customizeUsageTemplate makes sure the plugin's help output always has the `kubectl ` command prefix before the
-// plugin's command path to match the expected command path when it is executed via kubectl.
-// This implements https://krew.sigs.k8s.io/docs/developer-guide/develop/best-practices/#help-messages.
-// I.e., the default template would output:
-//
-//	Usage:
-//	  revisions [command]
-//
-// The modified template outputs:
-//
-//	Usage:
-//	  kubectl revisions [command]
-//
-// Changing cmd.Use to `kubectl revisions` makes cobra remove `revisions` from all command paths and use lines.
-func customizeUsageTemplate(cmd *cobra.Command) {
-	defaultTmpl := cmd.UsageTemplate()
-
-	r := regexp.MustCompile(`([{ ])(.CommandPath|.UseLine)([} ])`)
-	tmpl := r.ReplaceAllString(defaultTmpl, `$1(printf "kubectl %s" $2)$3`)
-
-	cmd.SetUsageTemplate(tmpl)
 }
 
 // hideGlobalFlagsInUsage customizes the help output of subcommands to skip the global flags section.
