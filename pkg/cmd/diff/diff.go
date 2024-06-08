@@ -56,35 +56,36 @@ func NewCommand(f util.Factory, streams genericiooptions.IOStreams) *cobra.Comma
 
 		Short: "Compare multiple revisions of a workload resource",
 		Long: `Compare multiple revisions of a workload resource (Deployment, StatefulSet, or DaemonSet).
-  A.k.a., "Why was my Deployment rolled?"
+A.k.a., "Why was my Deployment rolled?"
 
- The history is based on the ReplicaSets/ControllerRevisions still in the system. I.e., the history is limited by the
+The history is based on the ReplicaSets/ControllerRevisions still in the system. I.e., the history is limited by the
 configured revisionHistoryLimit.
 
- By default, the latest two revisions are compared. The --revision flag allows selecting the revisions to compare.
+By default, the latest two revisions are compared. The --revision flag allows selecting the revisions to compare.
 
- KUBECTL_EXTERNAL_DIFF environment variable can be used to select your own diff command. Users can use external commands
-with params too, example: KUBECTL_EXTERNAL_DIFF="colordiff -N -u"
+The ` + "`" + `KUBECTL_EXTERNAL_DIFF` + "`" + ` environment variable can be used to select your own diff command. Users can use external
+commands with params too, e.g.: ` + "`" + `KUBECTL_EXTERNAL_DIFF="colordiff -N -u"` + "`" + `
 
- By default, the "diff" command available in your path will be run with the "-u" (unified diff) and "-N" (treat absent
+By default, the ` + "`" + `diff` + "`" + ` command available in your path will be run with the ` + "`" + `-u` + "`" + ` (unified diff) and ` + "`" + `-N` + "`" + ` (treat absent
 files as empty) options.`,
-		Example: `  # Find out why the nginx Deployment was rolled: compare the latest two revisions
-  kubectl revisions diff deploy nginx
-  
-  # Compare the first and third revision
-  kubectl revisions diff deploy nginx --revision=1,3
-  
-  # Compare the previous revision and the revision before that
-  kubectl revisions diff deploy nginx --revision=-2
-  
-  # Use a colored external diff program
-  KUBECTL_EXTERNAL_DIFF="colordiff -u" kubectl revisions diff deploy nginx
-  
-  # Use dyff as a rich diff program
-  KUBECTL_EXTERNAL_DIFF="dyff between --omit-header" kubectl revisions diff deploy nginx
-  
-  # Show diff in VS Code
-  KUBECTL_EXTERNAL_DIFF="code --diff --wait" kubectl revisions diff deploy nginx
+
+		Example: `# Find out why the nginx Deployment was rolled: compare the latest two revisions
+kubectl revisions diff deploy nginx
+
+# Compare the first and third revision
+kubectl revisions diff deploy nginx --revision=1,3
+
+# Compare the previous revision and the revision before that
+kubectl revisions diff deploy nginx --revision=-2
+
+# Use a colored external diff program
+KUBECTL_EXTERNAL_DIFF="colordiff -u" kubectl revisions diff deploy nginx
+
+# Use dyff as a rich diff program
+KUBECTL_EXTERNAL_DIFF="dyff between --omit-header" kubectl revisions diff deploy nginx
+
+# Show diff in VS Code
+KUBECTL_EXTERNAL_DIFF="code --diff --wait" kubectl revisions diff deploy nginx
 `,
 
 		ValidArgsFunction: utilcomp.SpecifiedResourceTypeAndNameNoRepeatCompletionFunc(f, util.Map(history.SupportedKinds, strings.ToLower)),

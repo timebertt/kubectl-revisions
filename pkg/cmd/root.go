@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"os"
-	"regexp"
 
 	"github.com/spf13/cobra"
 	"k8s.io/cli-runtime/pkg/genericclioptions"
@@ -15,6 +14,7 @@ import (
 	"github.com/timebertt/kubectl-revisions/pkg/cmd/completion"
 	"github.com/timebertt/kubectl-revisions/pkg/cmd/diff"
 	"github.com/timebertt/kubectl-revisions/pkg/cmd/get"
+	"github.com/timebertt/kubectl-revisions/pkg/cmd/help"
 	"github.com/timebertt/kubectl-revisions/pkg/cmd/util"
 	"github.com/timebertt/kubectl-revisions/pkg/cmd/version"
 )
@@ -45,6 +45,7 @@ func NewCommand() *cobra.Command {
 			// This implements https://krew.sigs.k8s.io/docs/developer-guide/develop/best-practices/#help-messages.
 			// Changing cmd.Use to `kubectl revisions` makes cobra remove `revisions` from all command paths and use lines.
 			cobra.CommandDisplayNameAnnotation: "kubectl revisions",
+			help.AnnotationHideFlagsInUsage:    "true",
 		},
 
 		PersistentPreRunE: func(*cobra.Command, []string) error {
@@ -62,9 +63,10 @@ func NewCommand() *cobra.Command {
 	}
 
 	flags := cmd.PersistentFlags()
-
 	o.ConfigFlags.AddFlags(flags)
 	f := util.NewFactory(o.ConfigFlags)
+
+	cobra.EnableCommandSorting = false
 
 	defaultGroup := &cobra.Group{
 		ID:    "default",
@@ -73,8 +75,8 @@ func NewCommand() *cobra.Command {
 	cmd.AddGroup(defaultGroup)
 
 	for _, subcommand := range []*cobra.Command{
-		diff.NewCommand(f, o.IOStreams),
 		get.NewCommand(f, o.IOStreams),
+		diff.NewCommand(f, o.IOStreams),
 	} {
 		subcommand.GroupID = defaultGroup.ID
 		cmd.AddCommand(subcommand)
@@ -93,25 +95,14 @@ func NewCommand() *cobra.Command {
 	} {
 		subcommand.GroupID = otherGroup.ID
 		cmd.AddCommand(subcommand)
-		hideGlobalFlagsInUsage(cmd)
 	}
+
+	help.CustomizeTemplates(cmd)
 
 	utilcomp.SetFactoryForCompletion(f)
 	registerCompletionFuncForGlobalFlags(cmd, f)
 
 	return cmd
-}
-
-// hideGlobalFlagsInUsage customizes the help output of subcommands to skip the global flags section.
-// The function should be called after adding the subcommand to the parent command, otherwise the customization from
-// customizeUsageTemplate will be lost.
-func hideGlobalFlagsInUsage(cmd *cobra.Command) {
-	defaultTmpl := cmd.UsageTemplate()
-
-	r := regexp.MustCompile(`([{ ]).HasAvailableInheritedFlags([} ])`)
-	tmpl := r.ReplaceAllString(defaultTmpl, `${1}false${2}`)
-
-	cmd.SetUsageTemplate(tmpl)
 }
 
 func registerCompletionFuncForGlobalFlags(cmd *cobra.Command, f cmdutil.Factory) {
