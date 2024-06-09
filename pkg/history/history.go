@@ -11,6 +11,8 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
+
+	"github.com/timebertt/kubectl-revisions/pkg/helper"
 )
 
 // SupportedKinds is a list of object kinds supported by this package.
@@ -145,4 +147,38 @@ func (r Revisions) Predecessor(number int64) (Revision, error) {
 	}
 
 	return r[i-1], nil
+}
+
+// Replicas is a common struct for storing numbers of replicas.
+type Replicas struct {
+	Current, Ready int32
+}
+
+func (r Replicas) CurrentReplicas() int32 {
+	return r.Current
+}
+
+func (r Replicas) ReadyReplicas() int32 {
+	return r.Ready
+}
+
+type PodPredicate func(*corev1.Pod) bool
+
+// CountReplicas counts the number of total and ready replicas matching the given predicate in the list of pods.
+func CountReplicas(podList *corev1.PodList, predicate PodPredicate) Replicas {
+	var replicas Replicas
+
+	for _, pod := range podList.Items {
+		if !predicate(&pod) {
+			continue
+		}
+
+		replicas.Current++
+
+		if helper.IsPodReady(&pod) {
+			replicas.Ready++
+		}
+	}
+
+	return replicas
 }

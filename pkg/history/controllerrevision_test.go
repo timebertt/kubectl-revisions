@@ -1,11 +1,15 @@
 package history_test
 
 import (
+	"context"
+
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
 
 	. "github.com/timebertt/kubectl-revisions/pkg/history"
 )
@@ -99,5 +103,68 @@ var _ = Describe("ControllerRevision", func() {
 		It("should return the template", func() {
 			Expect(rev.PodTemplate()).To(Equal(rev.Template))
 		})
+	})
+})
+
+var _ = Describe("ListControllerRevisionsAndPods", func() {
+	var (
+		fakeClient client.Client
+
+		namespace string
+		selector  *metav1.LabelSelector
+
+		revision *appsv1.ControllerRevision
+		pod      *corev1.Pod
+	)
+
+	BeforeEach(func() {
+		namespace = "default"
+		labels := map[string]string{"app": "test"}
+		selector = &metav1.LabelSelector{MatchLabels: labels}
+
+		revision = &appsv1.ControllerRevision{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "test",
+				Namespace: namespace,
+				Labels:    labels,
+			},
+		}
+
+		revisionOtherNamespace := revision.DeepCopy()
+		revisionOtherNamespace.Name += "-other"
+		revisionOtherNamespace.Namespace += "-other"
+
+		revisionUnrelated := revision.DeepCopy()
+		revisionUnrelated.Name += "-not-matching"
+		revisionUnrelated.Labels["app"] = "other"
+
+		pod = &corev1.Pod{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "test-0",
+				Namespace: namespace,
+				Labels:    labels,
+			},
+		}
+
+		podOtherNamespace := pod.DeepCopy()
+		podOtherNamespace.Name += "-other"
+		podOtherNamespace.Namespace += "-other"
+
+		podUnrelated := pod.DeepCopy()
+		podUnrelated.Name += "-not-matching"
+		podUnrelated.Labels["app"] = "other"
+
+		fakeClient = fakeclient.NewFakeClient(
+			revision, revisionOtherNamespace, revisionUnrelated,
+			pod, podOtherNamespace, podUnrelated,
+		)
+	})
+
+	It("should return matching objects in the same namespace", func() {
+		controllerRevisionList, podList, err := ListControllerRevisionsAndPods(context.Background(), fakeClient, namespace, selector)
+		Expect(err).NotTo(HaveOccurred())
+
+		Expect(controllerRevisionList.Items).To(ConsistOf(*revision))
+		Expect(podList.Items).To(ConsistOf(*pod))
 	})
 })
