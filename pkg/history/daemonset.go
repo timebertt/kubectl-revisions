@@ -26,14 +26,9 @@ func (d DaemonSetHistory) ListRevisions(ctx context.Context, key client.ObjectKe
 		return nil, err
 	}
 
-	selector, err := metav1.LabelSelectorAsSelector(daemonSet.Spec.Selector)
+	controllerRevisionList, podList, err := ListControllerRevisionsAndPods(ctx, d.Client, daemonSet.Namespace, daemonSet.Spec.Selector)
 	if err != nil {
-		return nil, fmt.Errorf("error parsing DaemonSet selector: %w", err)
-	}
-
-	controllerRevisionList := &appsv1.ControllerRevisionList{}
-	if err := d.Client.List(ctx, controllerRevisionList, client.InNamespace(daemonSet.Namespace), client.MatchingLabelsSelector{Selector: selector}); err != nil {
-		return nil, fmt.Errorf("error listing ControllerRevisions: %w", err)
+		return nil, err
 	}
 
 	var revs Revisions
@@ -46,6 +41,8 @@ func (d DaemonSetHistory) ListRevisions(ctx context.Context, key client.ObjectKe
 		if err != nil {
 			return nil, fmt.Errorf("error converting ControllerRevision %s: %w", controllerRevision.Name, err)
 		}
+
+		revision.Replicas = CountReplicas(podList, PodBelongsToDaemonSetRevision(&controllerRevision))
 
 		revs = append(revs, revision)
 	}
@@ -79,4 +76,10 @@ func NewControllerRevisionForDaemonSet(controllerRevision *appsv1.ControllerRevi
 	}
 
 	return revision, nil
+}
+
+func PodBelongsToDaemonSetRevision(revision *appsv1.ControllerRevision) PodPredicate {
+	return func(pod *corev1.Pod) bool {
+		return pod.Labels[appsv1.DefaultDaemonSetUniqueLabelKey] == revision.Labels[appsv1.DefaultDaemonSetUniqueLabelKey]
+	}
 }

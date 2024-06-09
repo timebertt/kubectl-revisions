@@ -70,6 +70,17 @@ type Revision interface {
 	Object() client.Object
 	// PodTemplate returns the PodTemplate that was specified in this revision of the object.
 	PodTemplate() *corev1.Pod
+
+	// NB: Some Revision implementations like ReplicaSet might differentiate between the number of desired and current
+	// replicas (as the pods are not managed directly by the workload controller but through another controller).
+	// For other workload types, the number of desired replicas cannot be determined for all revisions from the status of
+	// the revision object or from the current Pods.
+	// To make the implementation and the history output simpler, the interface only defines current and ready replicas.
+
+	// CurrentReplicas returns the total number of replicas belonging to the Revision.
+	CurrentReplicas() int32
+	// ReadyReplicas returns the number of ready replicas belonging to the Revision.
+	ReadyReplicas() int32
 }
 
 // GetObjectKind implements runtime.Object.

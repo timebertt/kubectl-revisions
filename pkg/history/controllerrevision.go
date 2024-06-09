@@ -18,6 +18,8 @@ var _ Revision = &ControllerRevision{}
 type ControllerRevision struct {
 	ControllerRevision *appsv1.ControllerRevision
 	Template           *corev1.Pod
+
+	Replicas
 }
 
 // GetObjectKind implements runtime.Object.

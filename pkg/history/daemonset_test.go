@@ -3,6 +3,7 @@ package history_test
 import (
 	"context"
 	"fmt"
+	"strconv"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -14,7 +15,9 @@ import (
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
+	"github.com/timebertt/kubectl-revisions/pkg/helper"
 	. "github.com/timebertt/kubectl-revisions/pkg/history"
+	"github.com/timebertt/kubectl-revisions/pkg/maps"
 )
 
 var _ = Describe("DaemonSetHistory", func() {
@@ -120,15 +123,38 @@ var _ = Describe("DaemonSetHistory", func() {
 		})
 
 		It("should return a sorted list of the owned ControllerRevisions", func() {
+			// prepare some pods for all revisions
+			pod := podForDaemonSetRevision(controllerRevision1)
+			helper.SetPodCondition(pod, corev1.PodReady, corev1.ConditionTrue)
+			Expect(fakeClient.Create(context.Background(), pod)).To(Succeed())
+			pod = podForDaemonSetRevision(controllerRevision1)
+			helper.SetPodCondition(pod, corev1.PodReady, corev1.ConditionFalse)
+			Expect(fakeClient.Create(context.Background(), pod)).To(Succeed())
+
+			pod = podForDaemonSetRevision(controllerRevision3)
+			helper.SetPodCondition(pod, corev1.PodReady, corev1.ConditionTrue)
+			Expect(fakeClient.Create(context.Background(), pod)).To(Succeed())
+
+			pod = podForDaemonSetRevision(controllerRevisionUnrelated)
+			helper.SetPodCondition(pod, corev1.PodReady, corev1.ConditionTrue)
+			Expect(fakeClient.Create(context.Background(), pod)).To(Succeed())
+			pod = podForDaemonSetRevision(controllerRevisionUnrelated)
+			helper.SetPodCondition(pod, corev1.PodReady, corev1.ConditionTrue)
+			Expect(fakeClient.Create(context.Background(), pod)).To(Succeed())
+
 			revs, err := history.ListRevisions(ctx, client.ObjectKeyFromObject(daemonSet))
 			Expect(err).NotTo(HaveOccurred())
 			Expect(revs).To(HaveLen(2))
 
 			Expect(revs[0].Number()).To(BeEquivalentTo(1))
 			Expect(revs[0].Object()).To(Equal(controllerRevision1))
+			Expect(revs[0].CurrentReplicas()).To(BeEquivalentTo(2))
+			Expect(revs[0].ReadyReplicas()).To(BeEquivalentTo(1))
 
 			Expect(revs[1].Number()).To(BeEquivalentTo(3))
 			Expect(revs[1].Object()).To(Equal(controllerRevision3))
+			Expect(revs[1].CurrentReplicas()).To(BeEquivalentTo(1))
+			Expect(revs[1].ReadyReplicas()).To(BeEquivalentTo(1))
 		})
 	})
 
@@ -140,6 +166,25 @@ var _ = Describe("DaemonSetHistory", func() {
 			Expect(rev.Number()).To(BeEquivalentTo(1))
 			Expect(rev.Name()).To(Equal("app-b"))
 			Expect(rev.Object()).To(Equal(controllerRevision1))
+		})
+	})
+
+	Describe("PodBelongsToDaemonSetRevision", func() {
+		var related *corev1.Pod
+
+		BeforeEach(func() {
+			related = podForDaemonSetRevision(controllerRevision1)
+		})
+
+		It("should return true for a related pod", func() {
+			Expect(PodBelongsToDaemonSetRevision(controllerRevision1)(related)).To(BeTrue())
+		})
+
+		It("should return true for a related pod", func() {
+			unrelated := related.DeepCopy()
+			unrelated.Labels["controller-revision-hash"] = "other"
+
+			Expect(PodBelongsToDaemonSetRevision(controllerRevision1)(unrelated)).To(BeFalse())
 		})
 	})
 })
@@ -164,7 +209,7 @@ func controllerRevisionForDaemonSet(daemonSet *appsv1.DaemonSet, revision int64,
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      fmt.Sprintf("%s-%d", daemonSet.Name, revision),
 			Namespace: daemonSet.Namespace,
-			Labels:    labels,
+			Labels:    maps.Merge(labels, map[string]string{"controller-revision-hash": strconv.FormatInt(revision, 10)}),
 		},
 		Revision: revision,
 		Data: runtime.RawExtension{
@@ -175,4 +220,20 @@ func controllerRevisionForDaemonSet(daemonSet *appsv1.DaemonSet, revision int64,
 	Expect(controllerutil.SetControllerReference(daemonSet, controllerRevision, scheme)).To(Succeed())
 
 	return controllerRevision
+}
+
+func podForDaemonSetRevision(revision *appsv1.ControllerRevision) *corev1.Pod {
+	daemonSet := revision.Data.Object.(*appsv1.DaemonSet)
+
+	template := daemonSet.Spec.Template.DeepCopy()
+	pod := &corev1.Pod{
+		ObjectMeta: template.ObjectMeta,
+		Spec:       template.Spec,
+	}
+	pod.Labels["controller-revision-hash"] = strconv.FormatInt(revision.Revision, 10)
+	pod.Namespace = revision.Namespace
+	// this is not like in the real-world case but allows to easily create multiple pod on the fake client
+	pod.GenerateName = revision.Name + "-"
+
+	return pod
 }

@@ -26,14 +26,9 @@ func (d StatefulSetHistory) ListRevisions(ctx context.Context, key client.Object
 		return nil, err
 	}
 
-	selector, err := metav1.LabelSelectorAsSelector(statefulSet.Spec.Selector)
+	controllerRevisionList, podList, err := ListControllerRevisionsAndPods(ctx, d.Client, statefulSet.Namespace, statefulSet.Spec.Selector)
 	if err != nil {
-		return nil, fmt.Errorf("error parsing StatefulSet selector: %w", err)
-	}
-
-	controllerRevisionList := &appsv1.ControllerRevisionList{}
-	if err := d.Client.List(ctx, controllerRevisionList, client.InNamespace(statefulSet.Namespace), client.MatchingLabelsSelector{Selector: selector}); err != nil {
-		return nil, fmt.Errorf("error listing ControllerRevisions: %w", err)
+		return nil, err
 	}
 
 	var revs Revisions
@@ -46,6 +41,8 @@ func (d StatefulSetHistory) ListRevisions(ctx context.Context, key client.Object
 		if err != nil {
 			return nil, fmt.Errorf("error converting ControllerRevision %s: %w", controllerRevision.Name, err)
 		}
+
+		revision.Replicas = CountReplicas(podList, PodBelongsToStatefulSetRevision(&controllerRevision))
 
 		revs = append(revs, revision)
 	}
@@ -79,4 +76,10 @@ func NewControllerRevisionForStatefulSet(controllerRevision *appsv1.ControllerRe
 	}
 
 	return revision, nil
+}
+
+func PodBelongsToStatefulSetRevision(revision *appsv1.ControllerRevision) PodPredicate {
+	return func(pod *corev1.Pod) bool {
+		return pod.Labels[appsv1.StatefulSetRevisionLabel] == revision.Name
+	}
 }

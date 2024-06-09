@@ -17,6 +17,8 @@ type Revision struct {
 
 	Obj      client.Object
 	Template *corev1.Pod
+
+	history.Replicas
 }
 
 func (r *Revision) GetObjectKind() schema.ObjectKind {

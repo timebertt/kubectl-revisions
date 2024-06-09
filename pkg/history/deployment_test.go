@@ -95,11 +95,17 @@ var _ = Describe("DeploymentHistory", func() {
 			replicaSet1 = replicaSetForDeployment(deployment, 1, fakeClient.Scheme())
 			replicaSet1.Name = "app-b"
 			Expect(fakeClient.Create(ctx, replicaSet1)).To(Succeed())
+			replicaSet1.Status.Replicas = 1
+			replicaSet1.Status.ReadyReplicas = 1
+			Expect(fakeClient.Status().Update(ctx, replicaSet1)).To(Succeed())
 
 			// create a non-sorted list of ReplicaSets to verify that ListRevisions returns a sorted list
 			replicaSet3 = replicaSetForDeployment(deployment, 3, fakeClient.Scheme())
 			replicaSet3.Name = "app-a"
 			Expect(fakeClient.Create(ctx, replicaSet3)).To(Succeed())
+			replicaSet3.Status.Replicas = 1
+			replicaSet3.Status.ReadyReplicas = 0
+			Expect(fakeClient.Status().Update(ctx, replicaSet3)).To(Succeed())
 
 			replicaSetUnrelated = replicaSetForDeployment(deployment, 0, fakeClient.Scheme())
 			replicaSetUnrelated.OwnerReferences[0].UID = "other"
@@ -130,9 +136,13 @@ var _ = Describe("DeploymentHistory", func() {
 
 			Expect(revs[0].Number()).To(BeEquivalentTo(1))
 			Expect(revs[0].Object()).To(Equal(replicaSet1))
+			Expect(revs[0].CurrentReplicas()).To(BeEquivalentTo(1))
+			Expect(revs[0].ReadyReplicas()).To(BeEquivalentTo(1))
 
 			Expect(revs[1].Number()).To(BeEquivalentTo(3))
 			Expect(revs[1].Object()).To(Equal(replicaSet3))
+			Expect(revs[1].CurrentReplicas()).To(BeEquivalentTo(1))
+			Expect(revs[1].ReadyReplicas()).To(BeEquivalentTo(0))
 		})
 	})
 })

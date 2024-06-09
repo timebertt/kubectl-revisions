@@ -47,6 +47,10 @@ var _ = Describe("ControllerRevision", func() {
 		rev = &ControllerRevision{
 			ControllerRevision: controllerRevision,
 			Template:           template,
+			Replicas: Replicas{
+				Current: 2,
+				Ready:   1,
+			},
 		}
 	})
 
@@ -102,6 +106,18 @@ var _ = Describe("ControllerRevision", func() {
 	Describe("PodTemplate", func() {
 		It("should return the template", func() {
 			Expect(rev.PodTemplate()).To(Equal(rev.Template))
+		})
+	})
+
+	Describe("CurrentReplicas", func() {
+		It("should return the value of the Replicas.Current field", func() {
+			Expect(rev.CurrentReplicas()).To(Equal(rev.Replicas.Current))
+		})
+	})
+
+	Describe("ReadyReplicas", func() {
+		It("should return the value of the Replicas.Ready field", func() {
+			Expect(rev.ReadyReplicas()).To(Equal(rev.Replicas.Ready))
 		})
 	})
 })

@@ -44,6 +44,10 @@ var _ = Describe("ReplicaSet", func() {
 					},
 				},
 			},
+			Status: appsv1.ReplicaSetStatus{
+				Replicas:      2,
+				ReadyReplicas: 1,
+			},
 		}
 
 		var err error
@@ -105,6 +109,18 @@ var _ = Describe("ReplicaSet", func() {
 			template := rev.PodTemplate()
 			Expect(template.ObjectMeta).To(Equal(expectedTemplate.ObjectMeta))
 			Expect(template.Spec).To(Equal(expectedTemplate.Spec))
+		})
+	})
+
+	Describe("CurrentReplicas", func() {
+		It("should return the value of the status.replicas field", func() {
+			Expect(rev.CurrentReplicas()).To(Equal(replicaSet.Status.Replicas))
+		})
+	})
+
+	Describe("ReadyReplicas", func() {
+		It("should return the value of the status.readyReplicas field", func() {
+			Expect(rev.ReadyReplicas()).To(Equal(replicaSet.Status.ReadyReplicas))
 		})
 	})
 })
