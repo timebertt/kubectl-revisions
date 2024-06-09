@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"os"
-	"regexp"
 
 	"github.com/spf13/cobra"
 	"k8s.io/cli-runtime/pkg/genericclioptions"
@@ -15,6 +14,8 @@ import (
 	"github.com/timebertt/kubectl-revisions/pkg/cmd/completion"
 	"github.com/timebertt/kubectl-revisions/pkg/cmd/diff"
 	"github.com/timebertt/kubectl-revisions/pkg/cmd/get"
+	"github.com/timebertt/kubectl-revisions/pkg/cmd/help"
+	"github.com/timebertt/kubectl-revisions/pkg/cmd/options"
 	"github.com/timebertt/kubectl-revisions/pkg/cmd/util"
 	"github.com/timebertt/kubectl-revisions/pkg/cmd/version"
 )
@@ -39,6 +40,15 @@ func NewCommand() *cobra.Command {
 		Use:   "revisions",
 		Short: "Time-travel through your workload revision history",
 
+		Annotations: map[string]string{
+			// Setting the following annotation makes sure the plugin's help output always has the `kubectl ` command prefix
+			// before the plugin's command path to match the expected command path when it is executed via kubectl.
+			// This implements https://krew.sigs.k8s.io/docs/developer-guide/develop/best-practices/#help-messages.
+			// Changing cmd.Use to `kubectl revisions` makes cobra remove `revisions` from all command paths and use lines.
+			cobra.CommandDisplayNameAnnotation: "kubectl revisions",
+			help.AnnotationHideFlagsInUsage:    "true",
+		},
+
 		PersistentPreRunE: func(*cobra.Command, []string) error {
 			warningHandler := rest.NewWarningWriter(o.IOStreams.ErrOut, rest.WarningWriterOptions{Deduplicate: true, Color: printers.AllowsColorOutput(o.IOStreams.ErrOut)})
 			rest.SetDefaultWarningHandler(warningHandler)
@@ -54,10 +64,12 @@ func NewCommand() *cobra.Command {
 	}
 
 	flags := cmd.PersistentFlags()
-
 	o.ConfigFlags.AddFlags(flags)
 	f := util.NewFactory(o.ConfigFlags)
 
+	cobra.EnableCommandSorting = false
+
+	// default group
 	defaultGroup := &cobra.Group{
 		ID:    "default",
 		Title: "Available Commands:",
@@ -65,19 +77,19 @@ func NewCommand() *cobra.Command {
 	cmd.AddGroup(defaultGroup)
 
 	for _, subcommand := range []*cobra.Command{
-		diff.NewCommand(f, o.IOStreams),
 		get.NewCommand(f, o.IOStreams),
+		diff.NewCommand(f, o.IOStreams),
 	} {
 		subcommand.GroupID = defaultGroup.ID
 		cmd.AddCommand(subcommand)
 	}
 
+	// other group
 	otherGroup := &cobra.Group{
 		ID:    "other",
 		Title: "Other Commands:",
 	}
 	cmd.AddGroup(otherGroup)
-	cmd.SetHelpCommandGroupID(otherGroup.ID)
 
 	for _, subcommand := range []*cobra.Command{
 		completion.NewCommand(o.IOStreams),
@@ -85,50 +97,27 @@ func NewCommand() *cobra.Command {
 	} {
 		subcommand.GroupID = otherGroup.ID
 		cmd.AddCommand(subcommand)
-		hideGlobalFlagsInUsage(cmd)
 	}
 
-	customizeUsageTemplate(cmd)
+	// help group
+	helpGroup := &cobra.Group{
+		ID:    "help",
+		Title: "Help Commands:",
+	}
+	cmd.AddGroup(helpGroup)
+	cmd.SetHelpCommandGroupID(helpGroup.ID)
 
+	optionsCommand := options.NewCommand(o.IOStreams)
+	optionsCommand.GroupID = helpGroup.ID
+	cmd.AddCommand(optionsCommand)
+
+	help.CustomizeTemplates(cmd)
+
+	// completion
 	utilcomp.SetFactoryForCompletion(f)
 	registerCompletionFuncForGlobalFlags(cmd, f)
 
 	return cmd
-}
-
-// customizeUsageTemplate makes sure the plugin's help output always has the `kubectl ` command prefix before the
-// plugin's command path to match the expected command path when it is executed via kubectl.
-// This implements https://krew.sigs.k8s.io/docs/developer-guide/develop/best-practices/#help-messages.
-// I.e., the default template would output:
-//
-//	Usage:
-//	  revisions [command]
-//
-// The modified template outputs:
-//
-//	Usage:
-//	  kubectl revisions [command]
-//
-// Changing cmd.Use to `kubectl revisions` makes cobra remove `revisions` from all command paths and use lines.
-func customizeUsageTemplate(cmd *cobra.Command) {
-	defaultTmpl := cmd.UsageTemplate()
-
-	r := regexp.MustCompile(`([{ ])(.CommandPath|.UseLine)([} ])`)
-	tmpl := r.ReplaceAllString(defaultTmpl, `$1(printf "kubectl %s" $2)$3`)
-
-	cmd.SetUsageTemplate(tmpl)
-}
-
-// hideGlobalFlagsInUsage customizes the help output of subcommands to skip the global flags section.
-// The function should be called after adding the subcommand to the parent command, otherwise the customization from
-// customizeUsageTemplate will be lost.
-func hideGlobalFlagsInUsage(cmd *cobra.Command) {
-	defaultTmpl := cmd.UsageTemplate()
-
-	r := regexp.MustCompile(`([{ ]).HasAvailableInheritedFlags([} ])`)
-	tmpl := r.ReplaceAllString(defaultTmpl, `${1}false${2}`)
-
-	cmd.SetUsageTemplate(tmpl)
 }
 
 func registerCompletionFuncForGlobalFlags(cmd *cobra.Command, f cmdutil.Factory) {

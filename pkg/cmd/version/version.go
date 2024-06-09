@@ -6,6 +6,8 @@ import (
 
 	"github.com/spf13/cobra"
 	"k8s.io/cli-runtime/pkg/genericiooptions"
+
+	"github.com/timebertt/kubectl-revisions/pkg/cmd/help"
 )
 
 // version can be set via:
@@ -39,7 +41,12 @@ func NewCommand(streams genericiooptions.IOStreams) *cobra.Command {
 	return &cobra.Command{
 		Use:                   "version",
 		DisableFlagsInUseLine: true,
-		Short:                 "Print the version of kubectl-revisions",
+
+		Annotations: map[string]string{
+			help.AnnotationHideGlobalFlagsInUsage: "true",
+		},
+
+		Short: "Print the version of kubectl-revisions",
 		Long: `The version command prints the source version that was used to build the binary.
 Note that the version string's format can be different depending on how the binary was built.
 E.g, release builds inject the version via -ldflags, while installing with 'go install' injects

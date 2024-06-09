@@ -42,20 +42,22 @@ func NewCommand(f util.Factory, streams genericiooptions.IOStreams) *cobra.Comma
 		Short: "Get the revision history of a workload resource",
 		Long: `Get the revision history of a workload resource (Deployment, StatefulSet, or DaemonSet).
 
- The history is based on the ReplicaSets/ControllerRevisions still in the system. I.e., the history is limited by the
+The history is based on the ReplicaSets/ControllerRevisions still in the system. I.e., the history is limited by the
 configured revisionHistoryLimit.
 
- By default, all revisions are printed as a list. If the --revision flag is given, the selected revision is printed
+By default, all revisions are printed as a list. If the --revision flag is given, the selected revision is printed
 instead.
 `,
-		Example: `  # Get all revisions of the nginx Deployment
-  kubectl revisions get deploy nginx
-  
-  # Print additional columns like the revisions' images
-  kubectl revisions get deploy nginx -o wide
-  
-  # Get the latest revision in YAML
-  kubectl revisions get deploy nginx --revision=-1 -o yaml`,
+
+		Example: `# Get all revisions of the nginx Deployment
+kubectl revisions get deploy nginx
+
+# Print additional columns like the revisions' images
+kubectl revisions get deploy nginx -o wide
+
+# Get the latest revision in YAML
+kubectl revisions get deploy nginx --revision=-1 -o yaml
+`,
 
 		ValidArgsFunction: utilcomp.SpecifiedResourceTypeAndNameNoRepeatCompletionFunc(f, util.Map(history.SupportedKinds, strings.ToLower)),
 		Run: func(cmd *cobra.Command, args []string) {
