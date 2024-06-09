@@ -24,13 +24,15 @@ Using go:
 go install github.com/timebertt/kubectl-revisions@latest
 ```
 
-Learn how to set up shell completion:
+Set up shell completion ([docs](docs/kubectl_revisions_completion.md)):
 
 ```bash
 kubectl revisions completion -h
 ```
 
 ## Usage
+
+Also see the [reference docs](docs/kubectl_revisions.md).
 
 ### `k revisions get` / `k revisions list`
 
