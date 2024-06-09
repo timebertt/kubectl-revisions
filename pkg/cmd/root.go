@@ -15,6 +15,7 @@ import (
 	"github.com/timebertt/kubectl-revisions/pkg/cmd/diff"
 	"github.com/timebertt/kubectl-revisions/pkg/cmd/get"
 	"github.com/timebertt/kubectl-revisions/pkg/cmd/help"
+	"github.com/timebertt/kubectl-revisions/pkg/cmd/options"
 	"github.com/timebertt/kubectl-revisions/pkg/cmd/util"
 	"github.com/timebertt/kubectl-revisions/pkg/cmd/version"
 )
@@ -68,6 +69,7 @@ func NewCommand() *cobra.Command {
 
 	cobra.EnableCommandSorting = false
 
+	// default group
 	defaultGroup := &cobra.Group{
 		ID:    "default",
 		Title: "Available Commands:",
@@ -82,12 +84,12 @@ func NewCommand() *cobra.Command {
 		cmd.AddCommand(subcommand)
 	}
 
+	// other group
 	otherGroup := &cobra.Group{
 		ID:    "other",
 		Title: "Other Commands:",
 	}
 	cmd.AddGroup(otherGroup)
-	cmd.SetHelpCommandGroupID(otherGroup.ID)
 
 	for _, subcommand := range []*cobra.Command{
 		completion.NewCommand(o.IOStreams),
@@ -97,8 +99,21 @@ func NewCommand() *cobra.Command {
 		cmd.AddCommand(subcommand)
 	}
 
+	// help group
+	helpGroup := &cobra.Group{
+		ID:    "help",
+		Title: "Help Commands:",
+	}
+	cmd.AddGroup(helpGroup)
+	cmd.SetHelpCommandGroupID(helpGroup.ID)
+
+	optionsCommand := options.NewCommand(o.IOStreams)
+	optionsCommand.GroupID = helpGroup.ID
+	cmd.AddCommand(optionsCommand)
+
 	help.CustomizeTemplates(cmd)
 
+	// completion
 	utilcomp.SetFactoryForCompletion(f)
 	registerCompletionFuncForGlobalFlags(cmd, f)
 
