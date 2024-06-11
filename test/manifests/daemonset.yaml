@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: nginx
+  namespace: default
+  labels:
+    daemonset: nginx
+spec:
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      daemonset: nginx
+  template:
+    metadata:
+      labels:
+        daemonset: nginx
+    spec:
+      containers:
+      - image: nginx:1.21
+        name: nginx
+        readinessProbe:
+          initialDelaySeconds: 5
+          httpGet:
+            port: 80
