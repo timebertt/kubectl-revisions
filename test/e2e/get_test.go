@@ -36,12 +36,12 @@ var _ = Describe("get command", func() {
 
 		It("should work with alias ls", func() {
 			args[0] = "ls"
-			Eventually(RunPluginAndWait(args...)).Should(Say(`nginx-\S+\s+1\s+\d/\d\s+\S+\n`))
+			Eventually(RunPluginAndWait(args...)).Should(Say(`pause-\S+\s+1\s+\d/\d\s+\S+\n`))
 		})
 
 		It("should work with alias list", func() {
 			args[0] = "list"
-			Eventually(RunPluginAndWait(args...)).Should(Say(`nginx-\S+\s+1\s+\d/\d\s+\S+\n`))
+			Eventually(RunPluginAndWait(args...)).Should(Say(`pause-\S+\s+1\s+\d/\d\s+\S+\n`))
 		})
 	})
 
@@ -49,8 +49,8 @@ var _ = Describe("get command", func() {
 		It("should print a single revision in list format", func() {
 			session := RunPluginAndWait(args...)
 			Eventually(session).Should(Say(`NAME\s+REVISION\s+READY\s+AGE\n`))
-			Eventually(session).Should(Say(`nginx-\S+\s+1\s+\d/\d\s+\S+\n`))
-			Consistently(session).ShouldNot(Say(`nginx-`))
+			Eventually(session).Should(Say(`pause-\S+\s+1\s+\d/\d\s+\S+\n`))
+			Consistently(session).ShouldNot(Say(`pause-`))
 		})
 
 		It("should print image column in wide format", func() {
@@ -59,10 +59,10 @@ var _ = Describe("get command", func() {
 
 			session := RunPluginAndWait(append(args, "-o", "wide")...)
 			Eventually(session).Should(Say(`NAME\s+REVISION\s+READY\s+AGE\s+CONTAINERS\s+IMAGES\n`))
-			Eventually(session).Should(Say(`nginx-\S+\s+1\s+\d/\d\s+\S+\s+nginx\s+\S+:0.1\n`))
-			Eventually(session).Should(Say(`nginx-\S+\s+2\s+\d/\d\s+\S+\s+nginx\s+\S+:0.2\n`))
-			Eventually(session).Should(Say(`nginx-\S+\s+3\s+\d/\d\s+\S+\s+nginx\s+\S+:0.3\n`))
-			Consistently(session).ShouldNot(Say(`nginx-`))
+			Eventually(session).Should(Say(`pause-\S+\s+1\s+\d/\d\s+\S+\s+pause\s+\S+:0.1\n`))
+			Eventually(session).Should(Say(`pause-\S+\s+2\s+\d/\d\s+\S+\s+pause\s+\S+:0.2\n`))
+			Eventually(session).Should(Say(`pause-\S+\s+3\s+\d/\d\s+\S+\s+pause\s+\S+:0.3\n`))
+			Consistently(session).ShouldNot(Say(`pause-`))
 		})
 
 		It("should print a specific revision in list format (absolute revision)", func() {
@@ -70,8 +70,8 @@ var _ = Describe("get command", func() {
 			workload.BumpImage(object)
 
 			session := RunPluginAndWait(append(args, "--revision=2")...)
-			Eventually(session).Should(Say(`nginx-\S+\s+2\s+\d/\d\s+\S+\n`))
-			Consistently(session).ShouldNot(Say(`nginx-`))
+			Eventually(session).Should(Say(`pause-\S+\s+2\s+\d/\d\s+\S+\n`))
+			Consistently(session).ShouldNot(Say(`pause-`))
 		})
 
 		It("should print a specific revision in wide format (relative revision)", func() {
@@ -79,8 +79,8 @@ var _ = Describe("get command", func() {
 			workload.BumpImage(object)
 
 			session := RunPluginAndWait(append(args, "--revision=2", "-o", "wide")...)
-			Eventually(session).Should(Say(`nginx-\S+\s+2\s+\d/\d\s+\S+\s+nginx\s+\S+:0.2\n`))
-			Consistently(session).ShouldNot(Say(`nginx-`))
+			Eventually(session).Should(Say(`pause-\S+\s+2\s+\d/\d\s+\S+\s+pause\s+\S+:0.2\n`))
+			Consistently(session).ShouldNot(Say(`pause-`))
 		})
 
 		It("should print a specific revision in yaml format", func() {
@@ -138,23 +138,23 @@ var _ = Describe("get command", func() {
 
 		It("should work with short type", func() {
 			args[3] = "deploy"
-			Eventually(RunPluginAndWait(args...)).Should(Say(`nginx-\S+\s+1\s+\d/\d\s+\S+\n`))
+			Eventually(RunPluginAndWait(args...)).Should(Say(`pause-\S+\s+1\s+\d/\d\s+\S+\n`))
 		})
 
 		It("should work with grouped type", func() {
 			args[3] = "deployments.apps"
-			Eventually(RunPluginAndWait(args...)).Should(Say(`nginx-\S+\s+1\s+\d/\d\s+\S+\n`))
+			Eventually(RunPluginAndWait(args...)).Should(Say(`pause-\S+\s+1\s+\d/\d\s+\S+\n`))
 		})
 
 		It("should work with fully-qualified type", func() {
 			args[3] = "deployments.v1.apps"
-			Eventually(RunPluginAndWait(args...)).Should(Say(`nginx-\S+\s+1\s+\d/\d\s+\S+\n`))
+			Eventually(RunPluginAndWait(args...)).Should(Say(`pause-\S+\s+1\s+\d/\d\s+\S+\n`))
 		})
 
 		It("should work with slash name", func() {
-			args[3] = "deployment/nginx"
+			args[3] = "deployment/pause"
 			args = args[:len(args)-1]
-			Eventually(RunPluginAndWait(args...)).Should(Say(`nginx-\S+\s+1\s+\d/\d\s+\S+\n`))
+			Eventually(RunPluginAndWait(args...)).Should(Say(`pause-\S+\s+1\s+\d/\d\s+\S+\n`))
 		})
 	})
 
