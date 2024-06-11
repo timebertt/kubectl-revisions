@@ -59,14 +59,18 @@ func PodSpec() corev1.PodSpec {
 	}
 }
 
-func BumpImage(obj client.Object) {
+func SetImage(obj client.Object, image string) {
 	GinkgoHelper()
 
 	Expect(testClient.Patch(context.Background(), obj, client.RawPatch(types.JSONPatchType, []byte(`[{
 "op": "replace",
 "path": "/spec/template/spec/containers/0/image",
-"value": "`+Image()+`"
+"value": "`+image+`"
 }]`)))).To(Succeed())
 
 	Eventually(komega.Object(obj)).Should(HaveField("Status.ObservedGeneration", obj.GetGeneration()))
+}
+
+func BumpImage(obj client.Object) {
+	SetImage(obj, Image())
 }

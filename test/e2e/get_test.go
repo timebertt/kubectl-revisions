@@ -10,6 +10,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/envtest/komega"
 
 	. "github.com/timebertt/kubectl-revisions/test/e2e/exec"
 	"github.com/timebertt/kubectl-revisions/test/e2e/workload"
@@ -156,6 +157,21 @@ var _ = Describe("get command", func() {
 			args = args[:len(args)-1]
 			Eventually(RunPluginAndWait(args...)).Should(Say(`pause-\S+\s+1\s+\d/\d\s+\S+\n`))
 		})
+
+		It("should correctly print replicas", func() {
+			workload.Scale(object, 2)
+			Eventually(komega.Object(object)).Should(HaveField("Status.ReadyReplicas", int32(2)))
+
+			// prepare second revision with broken image
+			// this make it easy and deterministic to test the replica column for multiple revisions
+			workload.SetImage(object, workload.ImageRepository+":non-existing")
+			Eventually(komega.Object(object)).Should(HaveField("Status.UpdatedReplicas", int32(1)))
+
+			session := RunPluginAndWait(args...)
+			Eventually(session).Should(Say(`NAME\s+REVISION\s+READY\s+AGE\n`))
+			Eventually(session).Should(Say(`pause-\S+\s+1\s+2/2\s+\S+\n`))
+			Eventually(session).Should(Say(`pause-\S+\s+2\s+0/1\s+\S+\n`))
+		})
 	})
 
 	Context("StatefulSet", func() {
@@ -165,6 +181,21 @@ var _ = Describe("get command", func() {
 		})
 
 		testCommon()
+
+		It("should correctly print replicas", func() {
+			workload.Scale(object, 2)
+			Eventually(komega.Object(object)).Should(HaveField("Status.ReadyReplicas", int32(2)))
+
+			// prepare second revision with broken image
+			// this make it easy and deterministic to test the replica column for multiple revisions
+			workload.SetImage(object, workload.ImageRepository+":non-existing")
+			Eventually(komega.Object(object)).Should(HaveField("Status.UpdatedReplicas", int32(1)))
+
+			session := RunPluginAndWait(args...)
+			Eventually(session).Should(Say(`NAME\s+REVISION\s+READY\s+AGE\n`))
+			Eventually(session).Should(Say(`pause-\S+\s+1\s+1/1\s+\S+\n`))
+			Eventually(session).Should(Say(`pause-\S+\s+2\s+0/1\s+\S+\n`))
+		})
 	})
 
 	Context("DaemonSet", func() {
@@ -174,5 +205,28 @@ var _ = Describe("get command", func() {
 		})
 
 		testCommon()
+
+		It("should correctly print replicas", func() {
+			Eventually(komega.Object(object)).Should(HaveField("Status.NumberReady", int32(3)))
+
+			// prepare second revision with broken image
+			// this make it easy and deterministic to test the replica column for multiple revisions
+			workload.SetImage(object, workload.ImageRepository+":non-existing")
+			Eventually(komega.Object(object)).Should(And(
+				HaveField("Status.NumberReady", int32(2)),
+				HaveField("Status.UpdatedNumberScheduled", int32(1)),
+			))
+
+			// We cannot determine from the DaemonSet status whether the old pod has finished terminating. To make testing
+			// the plugin deterministic, wait until there are exactly 3 pods left in the namespace (stable state).
+			// We don't need this for Deployment or StatefulSet as waiting for the status.updatedReplicas field ensures
+			// the system has a stable state where nothing happens.
+			Eventually(komega.ObjectList(&corev1.PodList{}, client.InNamespace(namespace))).Should(HaveField("Items", HaveLen(3)))
+
+			session := RunPluginAndWait(args...)
+			Eventually(session).Should(Say(`NAME\s+REVISION\s+READY\s+AGE\n`))
+			Eventually(session).Should(Say(`pause-\S+\s+1\s+2/2\s+\S+\n`))
+			Eventually(session).Should(Say(`pause-\S+\s+2\s+0/1\s+\S+\n`))
+		})
 	})
 })

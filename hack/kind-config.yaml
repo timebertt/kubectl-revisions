@@ -1,0 +1,8 @@
+apiVersion: kind.x-k8s.io/v1alpha4
+kind: Cluster
+# create a cluster with 3 worker nodes so that we can test DaemonSets with multiple replicas easily.
+nodes:
+- role: control-plane
+- role: worker
+- role: worker
+- role: worker
