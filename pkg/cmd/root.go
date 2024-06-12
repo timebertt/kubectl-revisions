@@ -8,6 +8,7 @@ import (
 	"k8s.io/cli-runtime/pkg/genericiooptions"
 	"k8s.io/cli-runtime/pkg/printers"
 	"k8s.io/client-go/rest"
+	"k8s.io/component-base/logs"
 	cmdutil "k8s.io/kubectl/pkg/cmd/util"
 	utilcomp "k8s.io/kubectl/pkg/util/completion"
 
@@ -27,9 +28,10 @@ type Options struct {
 }
 
 func NewOptions() *Options {
+	ioStreams := genericiooptions.IOStreams{In: os.Stdin, Out: os.Stdout, ErrOut: os.Stderr}
 	return &Options{
-		IOStreams:   genericiooptions.IOStreams{In: os.Stdin, Out: os.Stdout, ErrOut: os.Stderr},
-		ConfigFlags: genericclioptions.NewConfigFlags(true).WithDeprecatedPasswordFlag().WithDiscoveryBurst(300).WithDiscoveryQPS(50.0),
+		IOStreams:   ioStreams,
+		ConfigFlags: genericclioptions.NewConfigFlags(true).WithDeprecatedPasswordFlag().WithDiscoveryBurst(300).WithDiscoveryQPS(50.0).WithWarningPrinter(ioStreams),
 	}
 }
 
@@ -65,6 +67,7 @@ func NewCommand() *cobra.Command {
 
 	flags := cmd.PersistentFlags()
 	o.ConfigFlags.AddFlags(flags)
+	logs.AddFlags(flags)
 	f := util.NewFactory(o.ConfigFlags)
 
 	cobra.EnableCommandSorting = false
