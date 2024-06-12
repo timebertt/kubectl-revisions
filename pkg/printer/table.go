@@ -1,6 +1,7 @@
 package printer
 
 import (
+	"fmt"
 	"io"
 	"strings"
 
@@ -45,6 +46,15 @@ var DefaultTableColumns = []TableColumn{
 			Type: "integer",
 		},
 		Extract: func(rev history.Revision) any { return rev.Number() },
+	},
+	{
+		TableColumnDefinition: metav1.TableColumnDefinition{
+			Name: "Ready",
+			Type: "string",
+		},
+		Extract: func(rev history.Revision) any {
+			return fmt.Sprintf("%d/%d", rev.ReadyReplicas(), rev.CurrentReplicas())
+		},
 	},
 	{
 		TableColumnDefinition: metav1.TableColumnDefinition{

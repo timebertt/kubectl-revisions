@@ -13,6 +13,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
 
+	"github.com/timebertt/kubectl-revisions/pkg/helper"
 	. "github.com/timebertt/kubectl-revisions/pkg/history"
 	"github.com/timebertt/kubectl-revisions/pkg/history/fake"
 )
@@ -190,6 +191,55 @@ var _ = Describe("Revisions", func() {
 	})
 })
 
+var _ = Describe("Replicas", func() {
+	Describe("CountReplicas", func() {
+		var (
+			pod, unrelated *corev1.Pod
+			predicate      PodPredicate
+		)
+
+		BeforeEach(func() {
+			pod = &corev1.Pod{
+				ObjectMeta: metav1.ObjectMeta{
+					Labels: map[string]string{"match": "true"},
+				},
+			}
+			helper.SetPodCondition(pod, corev1.PodReady, corev1.ConditionTrue)
+
+			unrelated = pod.DeepCopy()
+			unrelated.Labels["match"] = "false"
+
+			predicate = func(pod *corev1.Pod) bool {
+				return pod.Labels["match"] == "true"
+			}
+		})
+
+		It("should correctly count total replicas", func() {
+			replicas := CountReplicas(toPodList(), predicate)
+			Expect(replicas.CurrentReplicas()).To(BeEquivalentTo(0))
+
+			replicas = CountReplicas(toPodList(unrelated), predicate)
+			Expect(replicas.CurrentReplicas()).To(BeEquivalentTo(0))
+
+			replicas = CountReplicas(toPodList(pod.DeepCopy(), pod.DeepCopy(), unrelated), predicate)
+			Expect(replicas.CurrentReplicas()).To(BeEquivalentTo(2))
+		})
+
+		It("should correctly count ready replicas", func() {
+			notReady := pod.DeepCopy()
+			helper.SetPodCondition(notReady, corev1.PodReady, corev1.ConditionFalse)
+			unrelatedNotReady := notReady.DeepCopy()
+			unrelatedNotReady.Labels = unrelated.DeepCopy().Labels
+
+			podList := toPodList(pod.DeepCopy(), notReady, unrelated, unrelatedNotReady, pod.DeepCopy())
+
+			replicas := CountReplicas(podList, predicate)
+			Expect(replicas.CurrentReplicas()).To(BeEquivalentTo(3))
+			Expect(replicas.ReadyReplicas()).To(BeEquivalentTo(2))
+		})
+	})
+})
+
 func someRevision(num int64) Revision {
 	return &fake.Revision{
 		Num: num,
@@ -203,4 +253,16 @@ func someRevision(num int64) Revision {
 			},
 		},
 	}
+}
+
+func toPodList(pods ...*corev1.Pod) *corev1.PodList {
+	list := &corev1.PodList{
+		Items: make([]corev1.Pod, len(pods)),
+	}
+
+	for _, pod := range pods {
+		list.Items = append(list.Items, *pod)
+	}
+
+	return list
 }

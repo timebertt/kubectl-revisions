@@ -13,8 +13,20 @@ import (
 )
 
 const (
-	AppName         = "nginx"
-	ImageRepository = "registry.k8s.io/nginx-slim"
+	AppName = "pause"
+	// ImageRepository is the image repository holding the e2e test image.
+	// The repository has a copy of registry.k8s.io/pause:3.10 for linux/amd64 and linux/arm64.
+	// The copied image is tagged with 0.1 through 0.10.
+	// It was set up with the following commands:
+	//  for arch in amd64 arm64 ; do
+	//    crane copy registry.k8s.io/pause:3.10 ghcr.io/timebertt/e2e-pause:$arch --platform linux/$arch
+	//  done
+	//  for i in $(seq 1 10) ; do
+	//    crane index append -m ghcr.io/timebertt/e2e-pause:amd64 -m ghcr.io/timebertt/e2e-pause:arm64 -t ghcr.io/timebertt/e2e-pause:0.$i
+	//  done
+	// This image is used in e2e tests because it is small, fast to run, and has simple and consistent tags. But most
+	// importantly, it makes these e2e tests independent of external registries, which might change or rate limit pulls.
+	ImageRepository = "ghcr.io/timebertt/e2e-pause"
 )
 
 var (
@@ -23,7 +35,7 @@ var (
 
 func ImageTag() string {
 	generation++
-	if generation > 27 {
+	if generation > 10 {
 		panic("ImageTag called too many times")
 	}
 
@@ -47,14 +59,18 @@ func PodSpec() corev1.PodSpec {
 	}
 }
 
-func BumpImage(obj client.Object) {
+func SetImage(obj client.Object, image string) {
 	GinkgoHelper()
 
 	Expect(testClient.Patch(context.Background(), obj, client.RawPatch(types.JSONPatchType, []byte(`[{
 "op": "replace",
 "path": "/spec/template/spec/containers/0/image",
-"value": "`+Image()+`"
+"value": "`+image+`"
 }]`)))).To(Succeed())
 
 	Eventually(komega.Object(obj)).Should(HaveField("Status.ObservedGeneration", obj.GetGeneration()))
+}
+
+func BumpImage(obj client.Object) {
+	SetImage(obj, Image())
 }

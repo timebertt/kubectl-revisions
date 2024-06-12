@@ -35,8 +35,8 @@ var _ = Describe("diff command", func() {
 			workload.BumpImage(object)
 
 			session := RunPluginAndWait(args...)
-			Eventually(session).Should(Say(`--- \S+\/1-nginx-\S+\s`))
-			Eventually(session).Should(Say(`\+\+\+ \S+\/2-nginx-\S+\s`))
+			Eventually(session).Should(Say(`--- \S+\/1-pause-\S+\s`))
+			Eventually(session).Should(Say(`\+\+\+ \S+\/2-pause-\S+\s`))
 			Eventually(session).Should(Say(`-.+:0.1\n`))
 			Eventually(session).Should(Say(`\+.+:0.2\n`))
 		})
@@ -48,8 +48,8 @@ var _ = Describe("diff command", func() {
 			workload.BumpImage(object)
 
 			session := RunPluginAndWait(args...)
-			Eventually(session).Should(Say(`--- \S+\/2-nginx-\S+\s`))
-			Eventually(session).Should(Say(`\+\+\+ \S+\/3-nginx-\S+\s`))
+			Eventually(session).Should(Say(`--- \S+\/2-pause-\S+\s`))
+			Eventually(session).Should(Say(`\+\+\+ \S+\/3-pause-\S+\s`))
 			Eventually(session).Should(Say(`-.+:0.2\n`))
 			Eventually(session).Should(Say(`\+.+:0.3\n`))
 		})
@@ -59,8 +59,8 @@ var _ = Describe("diff command", func() {
 			workload.BumpImage(object)
 
 			session := RunPluginAndWait(append(args, "--revision=1,3")...)
-			Eventually(session).Should(Say(`--- \S+\/1-nginx-\S+\s`))
-			Eventually(session).Should(Say(`\+\+\+ \S+\/3-nginx-\S+\s`))
+			Eventually(session).Should(Say(`--- \S+\/1-pause-\S+\s`))
+			Eventually(session).Should(Say(`\+\+\+ \S+\/3-pause-\S+\s`))
 			Eventually(session).Should(Say(`-.+:0.1\n`))
 			Eventually(session).Should(Say(`\+.+:0.3\n`))
 		})
@@ -70,8 +70,8 @@ var _ = Describe("diff command", func() {
 			workload.BumpImage(object)
 
 			session := RunPluginAndWait(append(args, "--revision=2")...)
-			Eventually(session).Should(Say(`--- \S+\/1-nginx-\S+\s`))
-			Eventually(session).Should(Say(`\+\+\+ \S+\/2-nginx-\S+\s`))
+			Eventually(session).Should(Say(`--- \S+\/1-pause-\S+\s`))
+			Eventually(session).Should(Say(`\+\+\+ \S+\/2-pause-\S+\s`))
 			Eventually(session).Should(Say(`-.+:0.1\n`))
 			Eventually(session).Should(Say(`\+.+:0.2\n`))
 		})
@@ -81,8 +81,8 @@ var _ = Describe("diff command", func() {
 			workload.BumpImage(object)
 
 			session := RunPluginAndWait(append(args, "--revision=-2")...)
-			Eventually(session).Should(Say(`--- \S+\/1-nginx-\S+\s`))
-			Eventually(session).Should(Say(`\+\+\+ \S+\/2-nginx-\S+\s`))
+			Eventually(session).Should(Say(`--- \S+\/1-pause-\S+\s`))
+			Eventually(session).Should(Say(`\+\+\+ \S+\/2-pause-\S+\s`))
 			Eventually(session).Should(Say(`-.+:0.1\n`))
 			Eventually(session).Should(Say(`\+.+:0.2\n`))
 		})
@@ -92,8 +92,8 @@ var _ = Describe("diff command", func() {
 			workload.BumpImage(object)
 
 			session := RunPluginAndWait(append(args, "-o", "jsonpath={.spec.containers[0].image}")...)
-			Eventually(session).Should(Say(`--- \S+\/2-nginx-\S+\s`))
-			Eventually(session).Should(Say(`\+\+\+ \S+\/3-nginx-\S+\s`))
+			Eventually(session).Should(Say(`--- \S+\/2-pause-\S+\s`))
+			Eventually(session).Should(Say(`\+\+\+ \S+\/3-pause-\S+\s`))
 			Eventually(session).Should(Say(`-.+:0.2\n`))
 			Eventually(session).Should(Say(`\+.+:0.3\n`))
 		})
@@ -106,10 +106,10 @@ var _ = Describe("diff command", func() {
 				cmd.Env = append(cmd.Env, "KUBECTL_EXTERNAL_DIFF=ls")
 
 				session := Wait(RunCommand(cmd))
-				Eventually(session).Should(Say(`/1-nginx-`))
-				Eventually(session).Should(Say(`.` + namespace + `.nginx\n`))
-				Eventually(session).Should(Say(`/2-nginx-`))
-				Eventually(session).Should(Say(`.` + namespace + `.nginx\n`))
+				Eventually(session).Should(Say(`/1-pause-`))
+				Eventually(session).Should(Say(`.` + namespace + `.pause\n`))
+				Eventually(session).Should(Say(`/2-pause-`))
+				Eventually(session).Should(Say(`.` + namespace + `.pause\n`))
 			})
 
 			It("should invoke dyff as external diff program with subcommand and flags", func() {
@@ -123,7 +123,7 @@ var _ = Describe("diff command", func() {
 				cmd.Env = append(cmd.Env, "KUBECTL_EXTERNAL_DIFF=dyff between --omit-header --set-exit-code")
 
 				session := Wait(RunCommand(cmd))
-				Eventually(session).Should(Say(`spec.containers.nginx.image\n`))
+				Eventually(session).Should(Say(`spec.containers.pause.image\n`))
 				Eventually(session).Should(Say(`value change\n`))
 				Eventually(session).Should(Say(`-.+:0.1\n`))
 				Eventually(session).Should(Say(`\+.+:0.2\n`))
@@ -145,8 +145,8 @@ var _ = Describe("diff command", func() {
 			workload.BumpImage(object)
 
 			session := RunPluginAndWait(args...)
-			Eventually(session).Should(Say(`--- \S+\/1-nginx-\S+\s`))
-			Eventually(session).Should(Say(`\+\+\+ \S+\/2-nginx-\S+\s`))
+			Eventually(session).Should(Say(`--- \S+\/1-pause-\S+\s`))
+			Eventually(session).Should(Say(`\+\+\+ \S+\/2-pause-\S+\s`))
 			Eventually(session).Should(Say(`-.+:0.1\n`))
 			Eventually(session).Should(Say(`\+.+:0.2\n`))
 		})
@@ -157,8 +157,8 @@ var _ = Describe("diff command", func() {
 			workload.BumpImage(object)
 
 			session := RunPluginAndWait(args...)
-			Eventually(session).Should(Say(`--- \S+\/1-nginx-\S+\s`))
-			Eventually(session).Should(Say(`\+\+\+ \S+\/2-nginx-\S+\s`))
+			Eventually(session).Should(Say(`--- \S+\/1-pause-\S+\s`))
+			Eventually(session).Should(Say(`\+\+\+ \S+\/2-pause-\S+\s`))
 			Eventually(session).Should(Say(`-.+:0.1\n`))
 			Eventually(session).Should(Say(`\+.+:0.2\n`))
 		})
@@ -169,21 +169,21 @@ var _ = Describe("diff command", func() {
 			workload.BumpImage(object)
 
 			session := RunPluginAndWait(args...)
-			Eventually(session).Should(Say(`--- \S+\/1-nginx-\S+\s`))
-			Eventually(session).Should(Say(`\+\+\+ \S+\/2-nginx-\S+\s`))
+			Eventually(session).Should(Say(`--- \S+\/1-pause-\S+\s`))
+			Eventually(session).Should(Say(`\+\+\+ \S+\/2-pause-\S+\s`))
 			Eventually(session).Should(Say(`-.+:0.1\n`))
 			Eventually(session).Should(Say(`\+.+:0.2\n`))
 		})
 
 		It("should work with slash name", func() {
-			args[3] = "deployment/nginx"
+			args[3] = "deployment/pause"
 			args = args[:len(args)-1]
 
 			workload.BumpImage(object)
 
 			session := RunPluginAndWait(args...)
-			Eventually(session).Should(Say(`--- \S+\/1-nginx-\S+\s`))
-			Eventually(session).Should(Say(`\+\+\+ \S+\/2-nginx-\S+\s`))
+			Eventually(session).Should(Say(`--- \S+\/1-pause-\S+\s`))
+			Eventually(session).Should(Say(`\+\+\+ \S+\/2-pause-\S+\s`))
 			Eventually(session).Should(Say(`-.+:0.1\n`))
 			Eventually(session).Should(Say(`\+.+:0.2\n`))
 		})

@@ -11,6 +11,8 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
+
+	"github.com/timebertt/kubectl-revisions/pkg/helper"
 )
 
 // SupportedKinds is a list of object kinds supported by this package.
@@ -68,6 +70,17 @@ type Revision interface {
 	Object() client.Object
 	// PodTemplate returns the PodTemplate that was specified in this revision of the object.
 	PodTemplate() *corev1.Pod
+
+	// NB: Some Revision implementations like ReplicaSet might differentiate between the number of desired and current
+	// replicas (as the pods are not managed directly by the workload controller but through another controller).
+	// For other workload types, the number of desired replicas cannot be determined for all revisions from the status of
+	// the revision object or from the current Pods.
+	// To make the implementation and the history output simpler, the interface only defines current and ready replicas.
+
+	// CurrentReplicas returns the total number of replicas belonging to the Revision.
+	CurrentReplicas() int32
+	// ReadyReplicas returns the number of ready replicas belonging to the Revision.
+	ReadyReplicas() int32
 }
 
 // GetObjectKind implements runtime.Object.
@@ -145,4 +158,38 @@ func (r Revisions) Predecessor(number int64) (Revision, error) {
 	}
 
 	return r[i-1], nil
+}
+
+// Replicas is a common struct for storing numbers of replicas.
+type Replicas struct {
+	Current, Ready int32
+}
+
+func (r Replicas) CurrentReplicas() int32 {
+	return r.Current
+}
+
+func (r Replicas) ReadyReplicas() int32 {
+	return r.Ready
+}
+
+type PodPredicate func(*corev1.Pod) bool
+
+// CountReplicas counts the number of total and ready replicas matching the given predicate in the list of pods.
+func CountReplicas(podList *corev1.PodList, predicate PodPredicate) Replicas {
+	var replicas Replicas
+
+	for _, pod := range podList.Items {
+		if !predicate(&pod) {
+			continue
+		}
+
+		replicas.Current++
+
+		if helper.IsPodReady(&pod) {
+			replicas.Ready++
+		}
+	}
+
+	return replicas
 }

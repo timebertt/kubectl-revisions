@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: nginx
+  namespace: default
+  labels:
+    statefulset: nginx
+spec:
+  replicas: 3
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      statefulset: nginx
+  template:
+    metadata:
+      labels:
+        statefulset: nginx
+    spec:
+      containers:
+      - image: nginx:1.21
+        name: nginx
+        readinessProbe:
+          initialDelaySeconds: 5
+          httpGet:
+            port: 80

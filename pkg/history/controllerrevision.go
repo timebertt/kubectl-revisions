@@ -1,6 +1,9 @@
 package history
 
 import (
+	"context"
+	"fmt"
+
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -15,6 +18,8 @@ var _ Revision = &ControllerRevision{}
 type ControllerRevision struct {
 	ControllerRevision *appsv1.ControllerRevision
 	Template           *corev1.Pod
+
+	Replicas
 }
 
 // GetObjectKind implements runtime.Object.
@@ -55,4 +60,30 @@ func (c *ControllerRevision) Object() client.Object {
 
 func (c *ControllerRevision) PodTemplate() *corev1.Pod {
 	return c.Template
+}
+
+// ListControllerRevisionsAndPods is a helper for a ControllerRevision-based History implementation that needs to find
+// all ControllerRevisions and Pods belonging to a given workload object.
+func ListControllerRevisionsAndPods(ctx context.Context, r client.Reader, namespace string, selector *metav1.LabelSelector) (*appsv1.ControllerRevisionList, *corev1.PodList, error) {
+	listOptions := &client.ListOptions{
+		Namespace: namespace,
+	}
+
+	var err error
+	listOptions.LabelSelector, err = metav1.LabelSelectorAsSelector(selector)
+	if err != nil {
+		return nil, nil, fmt.Errorf("error parsing selector: %w", err)
+	}
+
+	controllerRevisionList := &appsv1.ControllerRevisionList{}
+	if err := r.List(ctx, controllerRevisionList, listOptions); err != nil {
+		return nil, nil, fmt.Errorf("error listing ControllerRevisions: %w", err)
+	}
+
+	podList := &corev1.PodList{}
+	if err := r.List(ctx, podList, listOptions); err != nil {
+		return nil, nil, fmt.Errorf("error listing Pods: %w", err)
+	}
+
+	return controllerRevisionList, podList, nil
 }

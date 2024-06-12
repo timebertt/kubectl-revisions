@@ -80,3 +80,11 @@ func (r *ReplicaSet) PodTemplate() *corev1.Pod {
 		Spec:       t.Spec,
 	}
 }
+
+func (r *ReplicaSet) CurrentReplicas() int32 {
+	return r.ReplicaSet.Status.Replicas
+}
+
+func (r *ReplicaSet) ReadyReplicas() int32 {
+	return r.ReplicaSet.Status.ReadyReplicas
+}
