@@ -1,18 +1,15 @@
 package main
 
 import (
-	"fmt"
-	"os"
-
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
-	"sigs.k8s.io/controller-runtime/pkg/manager/signals"
+	"k8s.io/component-base/cli"
+	cmdutil "k8s.io/kubectl/pkg/cmd/util"
 
 	"github.com/timebertt/kubectl-revisions/pkg/cmd"
 )
 
 func main() {
-	if err := cmd.NewCommand().ExecuteContext(signals.SetupSignalHandler()); err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+	if err := cli.RunNoErrOutput(cmd.NewCommand()); err != nil {
+		cmdutil.CheckErr(err)
 	}
 }
