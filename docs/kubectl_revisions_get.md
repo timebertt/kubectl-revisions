@@ -40,7 +40,6 @@ kubectl revisions get deploy nginx --revision=-1 -o yaml
       --no-headers                    When using the default output format, don't print headers (default print headers).
   -o, --output string                 Output format. One of: (json, yaml, name, go-template, go-template-file, template, templatefile, jsonpath, jsonpath-as-json, jsonpath-file, custom-columns, custom-columns-file, wide). See custom columns [https://kubernetes.io/docs/reference/kubectl/#custom-columns], golang template [https://golang.org/pkg/text/template/#pkg-overview] and jsonpath template [https://kubernetes.io/docs/reference/kubectl/jsonpath/].
   -r, --revision int                  Print the specified revision instead of getting the entire history. Specify -1 for the latest revision, -2 for the one before the latest, etc.
-      --show-kind                     If present, list the resource type for the requested object(s).
       --show-labels                   When printing, show all labels as the last column (default hide labels column)
       --show-managed-fields           If true, keep the managedFields when printing objects in JSON or YAML format.
       --template string               Template string or path to template file to use when -o=go-template, -o=go-template-file. The template format is golang templates [http://golang.org/pkg/text/template/#pkg-overview].

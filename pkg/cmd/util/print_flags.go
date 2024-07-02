@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/cli-runtime/pkg/genericclioptions"
 	"k8s.io/cli-runtime/pkg/printers"
 	kubectlget "k8s.io/kubectl/pkg/cmd/get"
@@ -77,11 +76,6 @@ func (f *PrintFlags) OutputUsage() string {
 	usage += "golang template [https://golang.org/pkg/text/template/#pkg-overview] and jsonpath template [https://kubernetes.io/docs/reference/kubectl/jsonpath/]."
 
 	return usage
-}
-
-// SetKind sets the Kind option of human-readable flags
-func (f *PrintFlags) SetKind(kind schema.GroupKind) {
-	f.TableFlags.SetKind(kind)
 }
 
 // ToPrinter returns a printer capable of handling the specified output format.

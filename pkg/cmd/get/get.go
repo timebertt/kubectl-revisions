@@ -127,7 +127,6 @@ func (o *Options) Run(ctx context.Context, f util.Factory, args []string) (err e
 		return fmt.Errorf("no revisions found for %s/%s", kindString, info.Name)
 	}
 
-	o.PrintFlags.SetKind(revs[0].GetObjectKind().GroupVersionKind().GroupKind())
 	p, err := o.PrintFlags.ToPrinter()
 	if err != nil {
 		return err
