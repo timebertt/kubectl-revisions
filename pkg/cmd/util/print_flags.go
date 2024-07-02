@@ -78,6 +78,10 @@ func (f *PrintFlags) OutputUsage() string {
 	return usage
 }
 
+func (f *PrintFlags) SetWithNamespace() {
+	f.TableFlags.SetWithNamespace()
+}
+
 // ToPrinter returns a printer capable of handling the specified output format.
 // History objects (e.g., Revision and Revisions) can be directly passed to the returned printer.
 func (f *PrintFlags) ToPrinter() (printers.ResourcePrinter, error) {

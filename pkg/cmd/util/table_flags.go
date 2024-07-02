@@ -13,6 +13,8 @@ type TablePrintFlags struct {
 	NoHeaders    *bool
 	ShowLabels   *bool
 	ColumnLabels []string
+
+	WithNamespace bool
 }
 
 func NewTablePrintFlags() *TablePrintFlags {
@@ -27,16 +29,21 @@ func (f *TablePrintFlags) AllowedFormats() []string {
 	return []string{"wide"}
 }
 
+func (f *TablePrintFlags) SetWithNamespace() {
+	f.WithNamespace = true
+}
+
 func (f *TablePrintFlags) ToPrinter(outputFormat string) (printers.ResourcePrinter, error) {
 	if f == nil || (len(outputFormat) > 0 && outputFormat != "wide") {
 		return nil, genericclioptions.NoCompatiblePrinterError{Options: f, AllowedFormats: f.AllowedFormats()}
 	}
 
 	p := printers.NewTablePrinter(printers.PrintOptions{
-		NoHeaders:    pointer.BoolDeref(f.NoHeaders, false),
-		ShowLabels:   pointer.BoolDeref(f.ShowLabels, false),
-		ColumnLabels: f.ColumnLabels,
-		Wide:         outputFormat == "wide",
+		NoHeaders:     pointer.BoolDeref(f.NoHeaders, false),
+		ShowLabels:    pointer.BoolDeref(f.ShowLabels, false),
+		ColumnLabels:  f.ColumnLabels,
+		Wide:          outputFormat == "wide",
+		WithNamespace: f.WithNamespace,
 	})
 
 	return printer.RevisionsToTablePrinter{
