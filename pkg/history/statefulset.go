@@ -17,7 +17,7 @@ var _ History = StatefulSetHistory{}
 
 // StatefulSetHistory implements the History interface for StatefulSets.
 type StatefulSetHistory struct {
-	Client client.Client
+	Client client.Reader
 }
 
 func (d StatefulSetHistory) ListRevisions(ctx context.Context, key client.ObjectKey) (Revisions, error) {

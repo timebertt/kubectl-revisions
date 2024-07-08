@@ -13,7 +13,7 @@ var _ History = DeploymentHistory{}
 
 // DeploymentHistory implements the History interface for Deployments.
 type DeploymentHistory struct {
-	Client client.Client
+	Client client.Reader
 }
 
 func (d DeploymentHistory) ListRevisions(ctx context.Context, key client.ObjectKey) (Revisions, error) {

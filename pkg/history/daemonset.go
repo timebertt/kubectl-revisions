@@ -17,7 +17,7 @@ var _ History = DaemonSetHistory{}
 
 // DaemonSetHistory implements the History interface for DaemonSets.
 type DaemonSetHistory struct {
-	Client client.Client
+	Client client.Reader
 }
 
 func (d DaemonSetHistory) ListRevisions(ctx context.Context, key client.ObjectKey) (Revisions, error) {

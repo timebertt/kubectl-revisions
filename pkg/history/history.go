@@ -26,6 +26,15 @@ type History interface {
 }
 
 // For instantiates a new History client for the given Object.
+// Note that the object is only used to determine the GroupKind to pass to ForGroupKind. The object for which to list
+// revisions must be passed to History.ListRevisions.
+// I.e., the following
+//
+//	history.For(c, &appsv1.Deployment{})
+//
+// is a convenient shortcut for
+//
+//	history.ForGroupKind(c, appsv1.SchemeGroupVersion.WithKind("Deployment").GroupKind())
 func For(c client.Client, obj client.Object) (History, error) {
 	gvk, err := apiutil.GVKForObject(obj, c.Scheme())
 	if err != nil {
@@ -36,7 +45,7 @@ func For(c client.Client, obj client.Object) (History, error) {
 }
 
 // ForGroupKind instantiates a new History client for the given GroupKind.
-func ForGroupKind(c client.Client, gk schema.GroupKind) (History, error) {
+func ForGroupKind(c client.Reader, gk schema.GroupKind) (History, error) {
 	switch {
 	case gk.Group == appsv1.GroupName && gk.Kind == "DaemonSet":
 		return DaemonSetHistory{Client: c}, nil
