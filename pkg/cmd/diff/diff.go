@@ -160,12 +160,7 @@ func (o *Options) Run(ctx context.Context, f util.Factory, args []string) (err e
 	kindString := fmt.Sprintf("%s.%s", strings.ToLower(groupKind.Kind), groupKind.Group)
 
 	// get all revisions for the given object
-	hist, err := history.ForGroupKind(c, groupKind)
-	if err != nil {
-		return err
-	}
-
-	revs, err := hist.ListRevisions(ctx, info.Object.(client.Object))
+	revs, err := history.ListRevisions(ctx, c, info.Object.(client.Object))
 	if err != nil {
 		return err
 	}

@@ -18,8 +18,20 @@ import (
 // SupportedKinds is a list of object kinds supported by this package.
 var SupportedKinds = []string{"Deployment", "StatefulSet", "DaemonSet"}
 
+// ListRevisions returns a sorted revision history (ascending) of the given object.
+// This is a convenient shortcut for using For and calling History.ListRevisions.
+func ListRevisions(ctx context.Context, c client.Client, obj client.Object) (Revisions, error) {
+	history, err := For(c, obj)
+	if err != nil {
+		return nil, err
+	}
+
+	return history.ListRevisions(ctx, obj)
+}
+
 // History is a kind-specific client that knows how to access the revision history of objects of that kind.
 // Instantiate a History with For or ForGroupKind.
+// Alternatively, use ListRevisions as a shortcut for listing revisions of a single object.
 type History interface {
 	// ListRevisions returns a sorted revision history (ascending) of the given object.
 	ListRevisions(ctx context.Context, obj client.Object) (Revisions, error)

@@ -138,6 +138,15 @@ var _ = Describe("DeploymentHistory", func() {
 			Expect(revs[1].CurrentReplicas()).To(BeEquivalentTo(1))
 			Expect(revs[1].ReadyReplicas()).To(BeEquivalentTo(0))
 		})
+
+		It("should also work via ListRevisions shortcut", func() {
+			revs, err := ListRevisions(ctx, fakeClient, deployment)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(revs).To(HaveLen(2))
+
+			Expect(revs[0].Object()).To(Equal(replicaSet1))
+			Expect(revs[1].Object()).To(Equal(replicaSet3))
+		})
 	})
 })
 
