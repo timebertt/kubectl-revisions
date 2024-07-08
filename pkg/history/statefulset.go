@@ -17,13 +17,13 @@ var _ History = StatefulSetHistory{}
 
 // StatefulSetHistory implements the History interface for StatefulSets.
 type StatefulSetHistory struct {
-	Client client.Client
+	Client client.Reader
 }
 
-func (d StatefulSetHistory) ListRevisions(ctx context.Context, key client.ObjectKey) (Revisions, error) {
-	statefulSet := &appsv1.StatefulSet{}
-	if err := d.Client.Get(ctx, key, statefulSet); err != nil {
-		return nil, err
+func (d StatefulSetHistory) ListRevisions(ctx context.Context, obj client.Object) (Revisions, error) {
+	statefulSet, ok := obj.(*appsv1.StatefulSet)
+	if !ok {
+		return nil, fmt.Errorf("expected *appsv1.StatefulSet, got %T", obj)
 	}
 
 	controllerRevisionList, podList, err := ListControllerRevisionsAndPods(ctx, d.Client, statefulSet.Namespace, statefulSet.Spec.Selector)

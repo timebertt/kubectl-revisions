@@ -13,13 +13,13 @@ var _ History = DeploymentHistory{}
 
 // DeploymentHistory implements the History interface for Deployments.
 type DeploymentHistory struct {
-	Client client.Client
+	Client client.Reader
 }
 
-func (d DeploymentHistory) ListRevisions(ctx context.Context, key client.ObjectKey) (Revisions, error) {
-	deployment := &appsv1.Deployment{}
-	if err := d.Client.Get(ctx, key, deployment); err != nil {
-		return nil, err
+func (d DeploymentHistory) ListRevisions(ctx context.Context, obj client.Object) (Revisions, error) {
+	deployment, ok := obj.(*appsv1.Deployment)
+	if !ok {
+		return nil, fmt.Errorf("expected *appsv1.Deployment, got %T", obj)
 	}
 
 	selector, err := metav1.LabelSelectorAsSelector(deployment.Spec.Selector)

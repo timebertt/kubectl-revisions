@@ -17,13 +17,13 @@ var _ History = DaemonSetHistory{}
 
 // DaemonSetHistory implements the History interface for DaemonSets.
 type DaemonSetHistory struct {
-	Client client.Client
+	Client client.Reader
 }
 
-func (d DaemonSetHistory) ListRevisions(ctx context.Context, key client.ObjectKey) (Revisions, error) {
-	daemonSet := &appsv1.DaemonSet{}
-	if err := d.Client.Get(ctx, key, daemonSet); err != nil {
-		return nil, err
+func (d DaemonSetHistory) ListRevisions(ctx context.Context, obj client.Object) (Revisions, error) {
+	daemonSet, ok := obj.(*appsv1.DaemonSet)
+	if !ok {
+		return nil, fmt.Errorf("expected *appsv1.DaemonSet, got %T", obj)
 	}
 
 	controllerRevisionList, podList, err := ListControllerRevisionsAndPods(ctx, d.Client, daemonSet.Namespace, daemonSet.Spec.Selector)
