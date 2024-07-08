@@ -16,16 +16,19 @@ import (
 	. "github.com/timebertt/kubectl-revisions/pkg/test/matcher"
 )
 
-func PrepareTestNamespace() string {
+func PrepareTestNamespace(optionalName ...string) string {
 	GinkgoHelper()
 
 	namespace := &corev1.Namespace{
 		ObjectMeta: metav1.ObjectMeta{
 			GenerateName: "test-",
-			Labels: map[string]string{
-				"e2e-test": "kubectl-revisions",
-			},
+			Labels:       CommonLabels(),
 		},
+	}
+
+	if len(optionalName) > 0 {
+		namespace.Name = optionalName[0]
+		namespace.GenerateName = ""
 	}
 
 	Expect(testClient.Create(context.Background(), namespace)).To(Succeed())

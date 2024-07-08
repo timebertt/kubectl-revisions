@@ -8,17 +8,21 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/envtest/komega"
+
+	"github.com/timebertt/kubectl-revisions/pkg/maps"
 )
 
-func CreateStatefulSet(namespace string) *appsv1.StatefulSet {
+func CreateStatefulSet(namespace string, name string) client.Object {
 	GinkgoHelper()
 
-	labels := map[string]string{"app": AppName}
+	labels := maps.Merge(CommonLabels(), map[string]string{"app": name})
 	statefulSet := &appsv1.StatefulSet{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      AppName,
+			Name:      name,
 			Namespace: namespace,
+			Labels:    labels,
 		},
 		Spec: appsv1.StatefulSetSpec{
 			Selector: &metav1.LabelSelector{

@@ -18,7 +18,12 @@ import (
 type Options struct {
 	genericiooptions.IOStreams
 
-	Namespace  string
+	Namespace     string
+	AllNamespaces bool
+
+	ChunkSize     int64
+	LabelSelector string
+
 	Revision   int64
 	PrintFlags *util.PrintFlags
 }
@@ -36,7 +41,7 @@ func NewCommand(f util.Factory, streams genericiooptions.IOStreams) *cobra.Comma
 	o := NewOptions(streams)
 
 	cmd := &cobra.Command{
-		Use:     "get (TYPE[.VERSION][.GROUP] NAME | TYPE[.VERSION][.GROUP]/NAME)",
+		Use:     "get (TYPE[.VERSION][.GROUP] [NAME | -l label] | TYPE[.VERSION][.GROUP]/NAME ...)",
 		Aliases: []string{"list", "ls"},
 
 		Short: "Get the revision history of a workload resource",
@@ -72,6 +77,10 @@ kubectl revisions get deploy nginx --revision=-1 -o yaml
 	cmd.Flags().Int64VarP(&o.Revision, "revision", "r", 0, "Print the specified revision instead of getting the entire history. "+
 		"Specify -1 for the latest revision, -2 for the one before the latest, etc.")
 
+	cmd.Flags().BoolVarP(&o.AllNamespaces, "all-namespaces", "A", o.AllNamespaces, "If present, list the requested object(s) across all namespaces. Namespace in current context is ignored even if specified with --namespace.")
+	cmdutil.AddChunkSizeFlag(cmd, &o.ChunkSize)
+	cmdutil.AddLabelSelectorFlagVar(cmd, &o.LabelSelector)
+
 	return cmd
 }
 
@@ -91,13 +100,22 @@ func (o *Options) Validate() error {
 func (o *Options) Run(ctx context.Context, f util.Factory, args []string) (err error) {
 	r := f.NewBuilder().
 		Unstructured().
-		NamespaceParam(o.Namespace).DefaultNamespace().
+		NamespaceParam(o.Namespace).DefaultNamespace().AllNamespaces(o.AllNamespaces).
+		LabelSelectorParam(o.LabelSelector).
+		RequestChunksOf(o.ChunkSize).
 		ResourceTypeOrNameArgs(true, args...).
 		SingleResourceType().
+		Flatten().
 		Do()
 
 	if err := r.Err(); err != nil {
 		return err
+	}
+
+	var singleItemImplied bool
+	r.IntoSingleItemImplied(&singleItemImplied)
+	if o.Revision != 0 && !singleItemImplied {
+		return fmt.Errorf("a revision can only be selected when targeting a single resource")
 	}
 
 	c, err := f.Client()
@@ -109,39 +127,55 @@ func (o *Options) Run(ctx context.Context, f util.Factory, args []string) (err e
 	if err != nil {
 		return err
 	}
-	info := infos[0]
-	groupKind := info.Mapping.GroupVersionKind.GroupKind()
+
+	if len(infos) == 0 {
+		if o.AllNamespaces {
+			_, _ = fmt.Fprintf(o.ErrOut, "No resources found.\n")
+		} else {
+			_, _ = fmt.Fprintf(o.ErrOut, "No resources found in %s namespace.\n", o.Namespace)
+		}
+		return
+	}
+
+	groupKind := infos[0].Mapping.GroupVersionKind.GroupKind()
 	kindString := fmt.Sprintf("%s.%s", strings.ToLower(groupKind.Kind), groupKind.Group)
 
-	// get all revisions for the given object
 	hist, err := history.ForGroupKind(c, groupKind)
 	if err != nil {
 		return err
 	}
 
-	revs, err := hist.ListRevisions(ctx, client.ObjectKey{Namespace: info.Namespace, Name: info.Name})
-	if err != nil {
-		return err
+	if o.AllNamespaces {
+		o.PrintFlags.SetWithNamespace()
 	}
-	if len(revs) == 0 {
-		return fmt.Errorf("no revisions found for %s/%s", kindString, info.Name)
-	}
-
-	o.PrintFlags.SetKind(revs[0].GetObjectKind().GroupVersionKind().GroupKind())
 	p, err := o.PrintFlags.ToPrinter()
 	if err != nil {
 		return err
 	}
 
-	if o.Revision != 0 {
-		// select a single revision
-		rev, err := revs.ByNumber(o.Revision)
+	var allRevisions history.Revisions
+	for _, info := range infos {
+		// get all revisions for the given object
+		revs, err := hist.ListRevisions(ctx, client.ObjectKey{Namespace: info.Namespace, Name: info.Name})
 		if err != nil {
 			return err
 		}
+		if len(revs) == 0 {
+			return fmt.Errorf("no revisions found for %s/%s", kindString, info.Name)
+		}
 
-		return p.PrintObj(rev, o.Out)
+		if o.Revision != 0 {
+			// select a single revision
+			rev, err := revs.ByNumber(o.Revision)
+			if err != nil {
+				return fmt.Errorf("error for %s/%s: %w", kindString, info.Name, err)
+			}
+
+			return p.PrintObj(rev, o.Out)
+		} else {
+			allRevisions = append(allRevisions, revs...)
+		}
 	}
 
-	return p.PrintObj(revs, o.Out)
+	return p.PrintObj(allRevisions, o.Out)
 }

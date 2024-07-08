@@ -74,3 +74,9 @@ func SetImage(obj client.Object, image string) {
 func BumpImage(obj client.Object) {
 	SetImage(obj, Image())
 }
+
+func CommonLabels() map[string]string {
+	return map[string]string{
+		"e2e-test": "kubectl-revisions",
+	}
+}

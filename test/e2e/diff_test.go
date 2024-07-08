@@ -25,7 +25,7 @@ var _ = Describe("diff command", func() {
 
 	Describe("command aliases", func() {
 		BeforeEach(func() {
-			object = workload.CreateDeployment(namespace)
+			object = workload.CreateDeployment(namespace, workload.AppName)
 			args = append(args, "deployment", object.GetName())
 		})
 
@@ -133,7 +133,7 @@ var _ = Describe("diff command", func() {
 
 	Context("Deployment", func() {
 		BeforeEach(func() {
-			object = workload.CreateDeployment(namespace)
+			object = workload.CreateDeployment(namespace, workload.AppName)
 			args = append(args, "deployment", object.GetName())
 		})
 
@@ -203,7 +203,7 @@ var _ = Describe("diff command", func() {
 
 	Context("StatefulSet", func() {
 		BeforeEach(func() {
-			object = workload.CreateStatefulSet(namespace)
+			object = workload.CreateStatefulSet(namespace, workload.AppName)
 			args = append(args, "statefulset", object.GetName())
 		})
 
@@ -224,7 +224,7 @@ var _ = Describe("diff command", func() {
 
 	Context("DaemonSet", func() {
 		BeforeEach(func() {
-			object = workload.CreateDaemonSet(namespace)
+			object = workload.CreateDaemonSet(namespace, workload.AppName)
 			args = append(args, "daemonset", object.GetName())
 		})
 

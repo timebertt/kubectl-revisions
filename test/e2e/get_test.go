@@ -8,6 +8,7 @@ import (
 	. "github.com/onsi/gomega/gbytes"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/envtest/komega"
@@ -31,7 +32,7 @@ var _ = Describe("get command", func() {
 
 	Describe("command aliases", func() {
 		BeforeEach(func() {
-			object = workload.CreateDeployment(namespace)
+			object = workload.CreateDeployment(namespace, workload.AppName)
 			args = append(args, "deployment", object.GetName())
 		})
 
@@ -46,7 +47,7 @@ var _ = Describe("get command", func() {
 		})
 	})
 
-	testCommon := func() {
+	testCommon := func(createObject func(namespace, name string) client.Object) {
 		It("should print a single revision in list format", func() {
 			session := RunPluginAndWait(args...)
 			Eventually(session).Should(Say(`NAME\s+REVISION\s+READY\s+AGE\n`))
@@ -127,15 +128,45 @@ var _ = Describe("get command", func() {
 
 			Expect(runtime.DecodeInto(decoder, list.Items[0].Raw, workload.RevisionObjectFor(object))).To(Succeed())
 		})
+
+		It("should list revisions of all resources in the namespace", func() {
+			createObject(namespace, workload.AppName+"1")
+			createObject(namespace, workload.AppName+"2")
+			createObject(namespace, workload.AppName+"3")
+
+			session := RunPluginAndWait(args[:len(args)-1]...)
+			Eventually(session).Should(Say(`NAME\s+REVISION\s+READY\s+AGE\n`))
+			Eventually(session).Should(Say(`pause-\S+\s+1\s+\d/\d\s+\S+\n`))
+			Eventually(session).Should(Say(`pause1-\S+\s+1\s+\d/\d\s+\S+\n`))
+			Eventually(session).Should(Say(`pause2-\S+\s+1\s+\d/\d\s+\S+\n`))
+			Eventually(session).Should(Say(`pause3-\S+\s+1\s+\d/\d\s+\S+\n`))
+		})
+
+		It("should list revisions of label-selected resources in all namespaces", func() {
+			createObject(namespace, workload.AppName+"1")
+
+			namespace2 := workload.PrepareTestNamespace(namespace + "1")
+			createObject(namespace2, workload.AppName+"2")
+			createObject(namespace2, workload.AppName+"3")
+
+			labelSelector := labels.SelectorFromValidatedSet(workload.CommonLabels())
+
+			session := RunPluginAndWait("get", args[3], "-A", "-l", labelSelector.String())
+			Eventually(session).Should(Say(`NAMESPACE\s+NAME\s+REVISION\s+READY\s+AGE\n`))
+			Eventually(session).Should(Say(namespace + `\s+pause-\S+\s+1\s+\d/\d\s+\S+\n`))
+			Eventually(session).Should(Say(namespace + `\s+pause1-\S+\s+1\s+\d/\d\s+\S+\n`))
+			Eventually(session).Should(Say(namespace2 + `\s+pause2-\S+\s+1\s+\d/\d\s+\S+\n`))
+			Eventually(session).Should(Say(namespace2 + `\s+pause3-\S+\s+1\s+\d/\d\s+\S+\n`))
+		})
 	}
 
 	Context("Deployment", func() {
 		BeforeEach(func() {
-			object = workload.CreateDeployment(namespace)
+			object = workload.CreateDeployment(namespace, workload.AppName)
 			args = append(args, "deployment", object.GetName())
 		})
 
-		testCommon()
+		testCommon(workload.CreateDeployment)
 
 		It("should work with short type", func() {
 			args[3] = "deploy"
@@ -162,7 +193,7 @@ var _ = Describe("get command", func() {
 			session := RunPluginAndWait(append(args, "-v6")...)
 			Eventually(session.Err).Should(Say(`Config loaded from file`))
 			Eventually(session.Err).Should(Say(`GET \S+/apis/apps/v1/namespaces/` + namespace + `/deployments/pause 200 OK`))
-			Eventually(session.Err).Should(Say(`GET \S+/apis/apps/v1/namespaces/` + namespace + `/replicasets\?labelSelector=app%3Dpause 200 OK`))
+			Eventually(session.Err).Should(Say(`GET \S+/apis/apps/v1/namespaces/` + namespace + `/replicasets\?labelSelector=app%3Dpause%2Ce2e-test%3Dkubectl-revisions 200 OK`))
 			Eventually(session).Should(Say(`NAME\s+REVISION\s+READY\s+AGE\n`))
 			Eventually(session).Should(Say(`pause-\S+\s+1\s+\d/\d\s+\S+\n`))
 		})
@@ -185,11 +216,11 @@ var _ = Describe("get command", func() {
 
 	Context("StatefulSet", func() {
 		BeforeEach(func() {
-			object = workload.CreateStatefulSet(namespace)
+			object = workload.CreateStatefulSet(namespace, workload.AppName)
 			args = append(args, "statefulset", object.GetName())
 		})
 
-		testCommon()
+		testCommon(workload.CreateStatefulSet)
 
 		It("should correctly print replicas", func() {
 			workload.Scale(object, 2)
@@ -209,11 +240,11 @@ var _ = Describe("get command", func() {
 
 	Context("DaemonSet", func() {
 		BeforeEach(func() {
-			object = workload.CreateDaemonSet(namespace)
+			object = workload.CreateDaemonSet(namespace, workload.AppName)
 			args = append(args, "daemonset", object.GetName())
 		})
 
-		testCommon()
+		testCommon(workload.CreateDaemonSet)
 
 		It("should correctly print replicas", func() {
 			Eventually(komega.Object(object)).Should(HaveField("Status.NumberReady", int32(3)))
