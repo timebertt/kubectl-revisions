@@ -105,19 +105,13 @@ var _ = Describe("DaemonSetHistory", func() {
 			}
 		})
 
-		It("should fail if the DaemonSet doesn't exist", func() {
-			revs, err := history.ListRevisions(ctx, client.ObjectKey{Name: "non-existing"})
-			Expect(err).To(beNotFoundError())
-			Expect(revs).To(BeNil())
-		})
-
 		It("should return an empty list if there are no ControllerRevisions", func() {
 			daemonSet.ResourceVersion = ""
 			daemonSet.UID = ""
 			daemonSet.Namespace = "other"
 			Expect(fakeClient.Create(ctx, daemonSet)).To(Succeed())
 
-			revs, err := history.ListRevisions(ctx, client.ObjectKeyFromObject(daemonSet))
+			revs, err := history.ListRevisions(ctx, daemonSet)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(revs).To(BeEmpty())
 		})
@@ -142,7 +136,7 @@ var _ = Describe("DaemonSetHistory", func() {
 			helper.SetPodCondition(pod, corev1.PodReady, corev1.ConditionTrue)
 			Expect(fakeClient.Create(context.Background(), pod)).To(Succeed())
 
-			revs, err := history.ListRevisions(ctx, client.ObjectKeyFromObject(daemonSet))
+			revs, err := history.ListRevisions(ctx, daemonSet)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(revs).To(HaveLen(2))
 

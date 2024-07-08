@@ -99,7 +99,7 @@ func (o *Options) Validate() error {
 // Run performs the get operation.
 func (o *Options) Run(ctx context.Context, f util.Factory, args []string) (err error) {
 	r := f.NewBuilder().
-		Unstructured().
+		WithScheme(history.Scheme, history.DecodingVersions...).
 		NamespaceParam(o.Namespace).DefaultNamespace().AllNamespaces(o.AllNamespaces).
 		LabelSelectorParam(o.LabelSelector).
 		RequestChunksOf(o.ChunkSize).
@@ -156,7 +156,7 @@ func (o *Options) Run(ctx context.Context, f util.Factory, args []string) (err e
 	var allRevisions history.Revisions
 	for _, info := range infos {
 		// get all revisions for the given object
-		revs, err := hist.ListRevisions(ctx, client.ObjectKey{Namespace: info.Namespace, Name: info.Name})
+		revs, err := hist.ListRevisions(ctx, info.Object.(client.Object))
 		if err != nil {
 			return err
 		}

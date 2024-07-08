@@ -136,7 +136,7 @@ func (o *Options) Validate() error {
 // Run performs the diff operation.
 func (o *Options) Run(ctx context.Context, f util.Factory, args []string) (err error) {
 	r := f.NewBuilder().
-		Unstructured().
+		WithScheme(history.Scheme, history.DecodingVersions...).
 		NamespaceParam(o.Namespace).DefaultNamespace().
 		ResourceTypeOrNameArgs(true, args...).
 		SingleResourceType().
@@ -165,7 +165,7 @@ func (o *Options) Run(ctx context.Context, f util.Factory, args []string) (err e
 		return err
 	}
 
-	revs, err := hist.ListRevisions(ctx, client.ObjectKey{Namespace: info.Namespace, Name: info.Name})
+	revs, err := hist.ListRevisions(ctx, info.Object.(client.Object))
 	if err != nil {
 		return err
 	}

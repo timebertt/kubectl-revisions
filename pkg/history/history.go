@@ -21,8 +21,8 @@ var SupportedKinds = []string{"Deployment", "StatefulSet", "DaemonSet"}
 // History is a kind-specific client that knows how to access the revision history of objects of that kind.
 // Instantiate a History with For or ForGroupKind.
 type History interface {
-	// ListRevisions returns a sorted revision history (ascending) of the object identified by the given key.
-	ListRevisions(ctx context.Context, key client.ObjectKey) (Revisions, error)
+	// ListRevisions returns a sorted revision history (ascending) of the given object.
+	ListRevisions(ctx context.Context, obj client.Object) (Revisions, error)
 }
 
 // For instantiates a new History client for the given Object.
