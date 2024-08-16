@@ -37,4 +37,4 @@ changelog:
   use: github
 
 snapshot:
-  name_template: "{{ incminor .Version }}-dev-{{ .ShortCommit }}"
+  version_template: "{{ incminor .Version }}-dev-{{ .ShortCommit }}"
