@@ -310,8 +310,8 @@ k8s.io/kube-openapi v0.0.0-20240228011516-70dd3763d340 h1:BZqlfIlq5YbRMFko6/PM7F
 k8s.io/kube-openapi v0.0.0-20240228011516-70dd3763d340/go.mod h1:yD4MZYeKMBwQKVht279WycxKyM84kkAx2DPrTXaeb98=
 k8s.io/kubectl v0.31.2 h1:gTxbvRkMBwvTSAlobiTVqsH6S8Aa1aGyBcu5xYLsn8M=
 k8s.io/kubectl v0.31.2/go.mod h1:EyASYVU6PY+032RrTh5ahtSOMgoDRIux9V1JLKtG5xM=
-k8s.io/utils v0.0.0-20241104100929-3ea5e8cea738 h1:M3sRQVHv7vB20Xc2ybTt7ODCeFj6JSWYFzOFnYeS6Ro=
-k8s.io/utils v0.0.0-20241104100929-3ea5e8cea738/go.mod h1:OLgZIPagt7ERELqWJFomSt595RzquPNLL48iOWgYOg0=
+k8s.io/utils v0.0.0-20241104163129-6fe5fd82f078 h1:jGnCPejIetjiy2gqaJ5V0NLwTpF4wbQ6cZIItJCSHno=
+k8s.io/utils v0.0.0-20241104163129-6fe5fd82f078/go.mod h1:OLgZIPagt7ERELqWJFomSt595RzquPNLL48iOWgYOg0=
 sigs.k8s.io/controller-runtime v0.19.1 h1:Son+Q40+Be3QWb+niBXAg2vFiYWolDjjRfO8hn/cxOk=
 sigs.k8s.io/controller-runtime v0.19.1/go.mod h1:iRmWllt8IlaLjvTTDLhRBXIEtkCK6hwVBJJsYS9Ajf4=
 sigs.k8s.io/json v0.0.0-20221116044647-bc3834ca7abd h1:EDPBXCAspyGV4jQlpZSudPeMmr1bNJefnuqLsRAsHZo=
