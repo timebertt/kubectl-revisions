@@ -20,7 +20,7 @@ $(TOOLS_BIN_DIR)/.version_%:
 
 DYFF := $(TOOLS_BIN_DIR)/dyff
 # renovate: datasource=github-releases depName=homeport/dyff
-DYFF_VERSION ?= 1.9.2
+DYFF_VERSION ?= 1.9.3
 $(DYFF): $(call tool_version_file,$(DYFF),$(DYFF_VERSION))
 	curl -sSfL https://github.com/homeport/dyff/releases/download/v$(DYFF_VERSION)/dyff_$(DYFF_VERSION)_$(shell uname -s | tr '[:upper:]' '[:lower:]')_$(shell uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/').tar.gz | tar -xzmf - -C $(TOOLS_BIN_DIR) dyff
 
