@@ -36,5 +36,5 @@ jobs:
       with:
         name: release
         path: dist/*
-    - uses: rajatjindal/krew-release-bot@v0.0.46
+    - uses: rajatjindal/krew-release-bot@v0.0.47
       if: ${{ startsWith(github.ref, 'refs/tags/v') }}
