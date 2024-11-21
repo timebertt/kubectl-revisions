@@ -31,7 +31,7 @@ $(GINKGO): $(call tool_version_file,$(GINKGO),$(GINKGO_VERSION))
 
 GOIMPORTS_REVISER := $(TOOLS_BIN_DIR)/goimports-reviser
 # renovate: datasource=github-releases depName=incu6us/goimports-reviser
-GOIMPORTS_REVISER_VERSION ?= v3.7.2
+GOIMPORTS_REVISER_VERSION ?= v3.7.4
 $(GOIMPORTS_REVISER): $(call tool_version_file,$(GOIMPORTS_REVISER),$(GOIMPORTS_REVISER_VERSION))
 	GOBIN=$(abspath $(TOOLS_BIN_DIR)) go install github.com/incu6us/goimports-reviser/v3@$(GOIMPORTS_REVISER_VERSION)
 
