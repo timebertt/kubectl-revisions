@@ -160,7 +160,8 @@ func (o *Options) Run(ctx context.Context, f util.Factory, args []string) (err e
 		if err != nil {
 			return err
 		}
-		if len(revs) == 0 {
+		if len(revs) == 0 && singleItemImplied {
+			// if targeting multiple items, we don't complain about individual items not having any revisions
 			return fmt.Errorf("no revisions found for %s/%s", kindString, info.Name)
 		}
 
@@ -175,6 +176,10 @@ func (o *Options) Run(ctx context.Context, f util.Factory, args []string) (err e
 		} else {
 			allRevisions = append(allRevisions, revs...)
 		}
+	}
+
+	if len(allRevisions) == 0 {
+		return fmt.Errorf("no revisions found for %s", kindString)
 	}
 
 	return p.PrintObj(allRevisions, o.Out)
