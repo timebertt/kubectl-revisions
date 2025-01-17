@@ -23,6 +23,10 @@ func AddFlags() {
 
 func PrepareTestBinaries() {
 	if binaryPath != "" {
+		// ensure binary path exists
+		_, err := os.Stat(binaryPath)
+		Expect(err).NotTo(HaveOccurred())
+
 		logf.Log.Info("Using pre-built binary", "path", binaryPath)
 	} else {
 		By("Building kubectl-revisions binary")
