@@ -10,6 +10,6 @@ import (
 
 var _ = Describe("version command", func() {
 	It("should print the version", func() {
-		Eventually(RunPluginAndWait("version")).Should(Say(`kubectl-revisions \((devel|v.+)\)`))
+		Eventually(RunPluginAndWait("version")).Should(Say(`kubectl-revisions (\(devel\)|v.+)`))
 	})
 })

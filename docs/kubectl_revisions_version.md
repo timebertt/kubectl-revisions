@@ -6,8 +6,8 @@ Print the version of kubectl-revisions
 
 The version command prints the source version that was used to build the binary.
 Note that the version string's format can be different depending on how the binary was built.
-E.g, release builds inject the version via -ldflags, while installing with 'go install' injects
-the go module's version (which can also be "(devel)").
+E.g., release builds inject the version via -ldflags, while installing with 'go build' or
+'go install' injects the go module's version (which can also be "(devel)").
 
 ```
 kubectl revisions version
