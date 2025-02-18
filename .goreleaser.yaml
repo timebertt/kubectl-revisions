@@ -26,12 +26,12 @@ checksum:
   name_template: "{{ .ProjectName }}_v{{ .Version }}_checksums.txt"
 
 archives:
-- format: tar.gz
+- formats: [tar.gz]
   name_template: "{{ .ProjectName }}_v{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}"
   # use zip for windows archives
   format_overrides:
   - goos: windows
-    format: zip
+    formats: [zip]
 
 changelog:
   use: github
