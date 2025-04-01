@@ -43,7 +43,7 @@ $(GOLANGCI_LINT): $(call tool_version_file,$(GOLANGCI_LINT),$(GOLANGCI_LINT_VERS
 
 GORELEASER := $(TOOLS_BIN_DIR)/goreleaser
 # renovate: datasource=github-releases depName=goreleaser/goreleaser
-GORELEASER_VERSION ?= v2.8.1
+GORELEASER_VERSION ?= v2.8.2
 $(GORELEASER): $(call tool_version_file,$(GORELEASER),$(GORELEASER_VERSION))
 	curl -sSfL https://github.com/goreleaser/goreleaser/releases/download/$(GORELEASER_VERSION)/goreleaser_$(shell uname -s)_$(shell uname -m).tar.gz | tar -xzmf - -C $(TOOLS_BIN_DIR) goreleaser
 
