@@ -66,6 +66,6 @@ scripts for this plugin along with other kubectl plugins that support it.
 
 // Run outputs the completion script.
 func (o *Options) Run() error {
-	_, err := o.IOStreams.Out.Write(completionScript)
+	_, err := o.Out.Write(completionScript)
 	return err
 }

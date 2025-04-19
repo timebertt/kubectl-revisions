@@ -111,13 +111,13 @@ var _ = Describe("ControllerRevision", func() {
 
 	Describe("CurrentReplicas", func() {
 		It("should return the value of the Replicas.Current field", func() {
-			Expect(rev.CurrentReplicas()).To(Equal(rev.Replicas.Current))
+			Expect(rev.CurrentReplicas()).To(Equal(rev.Current))
 		})
 	})
 
 	Describe("ReadyReplicas", func() {
 		It("should return the value of the Replicas.Ready field", func() {
-			Expect(rev.ReadyReplicas()).To(Equal(rev.Replicas.Ready))
+			Expect(rev.ReadyReplicas()).To(Equal(rev.Ready))
 		})
 	})
 })
