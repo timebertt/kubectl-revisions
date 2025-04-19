@@ -52,7 +52,7 @@ func NewCommand() *cobra.Command {
 		},
 
 		PersistentPreRunE: func(*cobra.Command, []string) error {
-			warningHandler := rest.NewWarningWriter(o.IOStreams.ErrOut, rest.WarningWriterOptions{Deduplicate: true, Color: printers.AllowsColorOutput(o.IOStreams.ErrOut)})
+			warningHandler := rest.NewWarningWriter(o.ErrOut, rest.WarningWriterOptions{Deduplicate: true, Color: printers.AllowsColorOutput(o.ErrOut)})
 			rest.SetDefaultWarningHandler(warningHandler)
 			return nil
 		},

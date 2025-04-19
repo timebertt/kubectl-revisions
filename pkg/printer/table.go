@@ -110,7 +110,7 @@ func (p RevisionsToTablePrinter) PrintObj(obj runtime.Object, w io.Writer) error
 
 	// build column definitions
 	for _, column := range p.Columns {
-		t.ColumnDefinitions = append(t.ColumnDefinitions, *column.TableColumnDefinition.DeepCopy())
+		t.ColumnDefinitions = append(t.ColumnDefinitions, *column.DeepCopy())
 	}
 
 	// build rows
