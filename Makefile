@@ -122,7 +122,7 @@ install: ## Install the kubectl-revisions binary to $GOBIN.
 ##@ Test Setup
 
 # renovate: datasource=docker depName=kindest/node
-KIND_KUBERNETES_VERSION ?= v1.33.0
+KIND_KUBERNETES_VERSION ?= v1.33.1
 
 KIND_KUBECONFIG := $(PROJECT_DIR)/hack/kind_kubeconfig.yaml
 kind-up kind-down: export KUBECONFIG = $(KIND_KUBECONFIG)
