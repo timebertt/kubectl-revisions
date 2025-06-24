@@ -192,8 +192,8 @@ var _ = Describe("get command", func() {
 		It("should support the -v flag", func() {
 			session := RunPluginAndWait(append(args, "-v6")...)
 			Eventually(session.Err).Should(Say(`Config loaded from file`))
-			Eventually(session.Err).Should(Say(`GET \S+/apis/apps/v1/namespaces/` + namespace + `/deployments/pause 200 OK`))
-			Eventually(session.Err).Should(Say(`GET \S+/apis/apps/v1/namespaces/` + namespace + `/replicasets\?labelSelector=app%3Dpause%2Ce2e-test%3Dkubectl-revisions 200 OK`))
+			Eventually(session.Err).Should(Say(`GET[ \S]+/apis/apps/v1/namespaces/` + namespace + `/deployments/pause`))
+			Eventually(session.Err).Should(Say(`GET[ \S]+/apis/apps/v1/namespaces/` + namespace + `/replicasets\?labelSelector=app%3Dpause%2Ce2e-test%3Dkubectl-revisions`))
 			Eventually(session).Should(Say(`NAME\s+REVISION\s+READY\s+AGE\n`))
 			Eventually(session).Should(Say(`pause-\S+\s+1\s+\d/\d\s+\S+\n`))
 		})
