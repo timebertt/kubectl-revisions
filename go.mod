@@ -9,7 +9,7 @@ require (
 	github.com/go-task/slim-sprig/v3 v3.0.0
 	github.com/hashicorp/go-multierror v1.1.1
 	github.com/onsi/ginkgo/v2 v2.25.1
-	github.com/onsi/gomega v1.38.1
+	github.com/onsi/gomega v1.38.2
 	github.com/spf13/cobra v1.9.1
 	github.com/spf13/pflag v1.0.7
 	k8s.io/api v0.33.4
