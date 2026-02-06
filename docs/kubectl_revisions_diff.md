@@ -50,7 +50,7 @@ KUBECTL_EXTERNAL_DIFF="code --diff --wait" kubectl revisions diff deploy nginx
 ```
       --allow-missing-template-keys   If true, ignore any errors in templates when a field or map key is missing in the template. Only applies to golang and jsonpath output formats. (default true)
   -h, --help                          help for diff
-  -o, --output string                 Output format. One of: (json, yaml, go-template, go-template-file, template, templatefile, jsonpath, jsonpath-as-json, jsonpath-file). See golang template [https://golang.org/pkg/text/template/#pkg-overview] and jsonpath template [https://kubernetes.io/docs/reference/kubectl/jsonpath/]. (default "yaml")
+  -o, --output string                 Output format. One of: (json, yaml, kyaml, go-template, go-template-file, template, templatefile, jsonpath, jsonpath-as-json, jsonpath-file). See golang template [https://golang.org/pkg/text/template/#pkg-overview] and jsonpath template [https://kubernetes.io/docs/reference/kubectl/jsonpath/]. (default "yaml")
   -r, --revision int64Slice           Compare the specified revision with its predecessor. Specify -1 for the latest revision, -2 for the one before the latest, etc.
                                       If given twice, compare the specified two revisions. If not given, compare the latest two revisions. (default [])
       --show-managed-fields           If true, keep the managedFields when printing objects in JSON or YAML format.
@@ -64,6 +64,7 @@ KUBECTL_EXTERNAL_DIFF="code --diff --wait" kubectl revisions diff deploy nginx
       --as string                      Username to impersonate for the operation. User could be a regular user or a service account in a namespace.
       --as-group stringArray           Group to impersonate for the operation, this flag can be repeated to specify multiple groups.
       --as-uid string                  UID to impersonate for the operation.
+      --as-user-extra stringArray      User extras to impersonate for the operation, this flag can be repeated to specify multiple values for the same key.
       --cache-dir string               Default cache directory (default "$HOME/.kube/cache")
       --certificate-authority string   Path to a cert file for the certificate authority
       --client-certificate string      Path to a client certificate file for TLS
