@@ -72,8 +72,11 @@ var DefaultTableColumns = []TableColumn{
 			Priority: 1,
 		},
 		Extract: func(rev history.Revision) any {
-			var names []string
-			for _, container := range rev.PodTemplate().Spec.Containers {
+			var (
+				containers = rev.PodTemplate().Spec.Containers
+				names      = make([]string, 0, len(containers))
+			)
+			for _, container := range containers {
 				names = append(names, container.Name)
 			}
 			return strings.Join(names, ",")
@@ -86,8 +89,11 @@ var DefaultTableColumns = []TableColumn{
 			Priority: 1,
 		},
 		Extract: func(rev history.Revision) any {
-			var images []string
-			for _, container := range rev.PodTemplate().Spec.Containers {
+			var (
+				containers = rev.PodTemplate().Spec.Containers
+				images     = make([]string, 0, len(containers))
+			)
+			for _, container := range containers {
 				images = append(images, container.Image)
 			}
 			return strings.Join(images, ",")
