@@ -2,7 +2,7 @@ module github.com/timebertt/kubectl-revisions
 
 go 1.25.0
 
-toolchain go1.25.8
+toolchain go1.26.1
 
 require (
 	github.com/go-logr/logr v1.4.3
